@@ -1,5 +1,6 @@
 export type Task = {
-  id: number;
+  _id: string; // MongoDB uses _id as the primary key
+  id?: number;
   title: string;
   description: string;
   priority: string;
