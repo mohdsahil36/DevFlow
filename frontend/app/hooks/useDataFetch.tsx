@@ -14,15 +14,27 @@ interface UseDataFetchReturn {
   data: Task[] | null;
 }
 
-export default function useDataFetch(): UseDataFetchReturn {
+export default function useDataFetch(route?: string): UseDataFetchReturn {
   const [data, setData] = useState<Task[] | null>(null);
 
   useEffect(() => {
-    // Only fetch data if we're on the kanban route
-    if (window.location.pathname.includes("/kanban")) {
+    let shouldFetch = false;
+    let fetchRoute = "";
+
+    if (route) {
+      // If route is provided, fetch from that specific route
+      shouldFetch = true;
+      fetchRoute = route.startsWith("/") ? route : `/${route}`;
+    } else {
+      // If no route provided, only fetch if we're on kanban page
+      shouldFetch = window.location.pathname.includes("/kanban");
+      fetchRoute = "/kanban";
+    }
+
+    if (shouldFetch) {
       async function fetchData() {
         try {
-          const response = await fetch("http://localhost:8080/kanban");
+          const response = await fetch(`http://localhost:8080${fetchRoute}`);
 
           // Check if response is ok
           if (!response.ok) {
@@ -50,7 +62,7 @@ export default function useDataFetch(): UseDataFetchReturn {
 
       fetchData();
     }
-  }, []);
+  }, [route]); // Include route in dependencies
 
   return { data };
 }
