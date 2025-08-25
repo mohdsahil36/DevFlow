@@ -18,35 +18,38 @@ export default function useDataFetch(): UseDataFetchReturn {
   const [data, setData] = useState<Task[] | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch("http://localhost:8080");
+    // Only fetch data if we're on the kanban route
+    if (window.location.pathname.includes("/kanban")) {
+      async function fetchData() {
+        try {
+          const response = await fetch("http://localhost:8080/kanban");
 
-        // Check if response is ok
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          // Check if response is ok
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const json: ApiResponse = await response.json();
+
+          // Check if API response indicates success
+          if (!json.success) {
+            throw new Error("API returned unsuccessful response");
+          }
+
+          // Extract the actual data array from the nested structure
+          if (json.data && Array.isArray(json.data)) {
+            setData(json.data);
+          } else {
+            throw new Error("Invalid data format received from API");
+          }
+        } catch (err) {
+          throw new Error("Data can't be fetched!");
+          setData(null);
         }
-
-        const json: ApiResponse = await response.json();
-
-        // Check if API response indicates success
-        if (!json.success) {
-          throw new Error("API returned unsuccessful response");
-        }
-
-        // Extract the actual data array from the nested structure
-        if (json.data && Array.isArray(json.data)) {
-          setData(json.data);
-        } else {
-          throw new Error("Invalid data format received from API");
-        }
-      } catch (err) {
-        throw new Error("Data can't be fetched!");
-        setData(null);
       }
-    }
 
-    fetchData();
+      fetchData();
+    }
   }, []);
 
   return { data };
