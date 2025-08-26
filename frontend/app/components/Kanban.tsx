@@ -149,15 +149,15 @@ export default function KanbanBoard() {
     // Update the task status in the backend
     try {
       const response = await fetch(
-        `http://localhost:8080/tasks/${taskId}/status`,
+        `http://localhost:8080/tasks/${taskId}/status?status=${newStatus}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            status: newStatus,
-          }),
+          // body: JSON.stringify({
+          //   status: newStatus,
+          // }),
         }
       );
 
