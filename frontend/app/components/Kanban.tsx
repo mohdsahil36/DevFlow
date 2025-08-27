@@ -155,16 +155,11 @@ export default function KanbanBoard() {
           headers: {
             "Content-Type": "application/json",
           },
-          // body: JSON.stringify({
-          //   status: newStatus,
-          // }),
         }
       );
 
       if (!response.ok) {
         console.error("Failed to update task status in backend");
-      } else {
-        console.log(`Task ${taskId} status updated to ${newStatus} in backend`);
       }
     } catch (error) {
       console.error("Error updating task status:", error);
