@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import useDataFetch from "../hooks/useDataFetch";
 import { Task, Column } from "../types/types";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import AddTask from "../components/AddTask";
 import { DragEndEvent } from "@dnd-kit/core";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
 
@@ -187,13 +186,7 @@ export default function KanbanBoard() {
                 )}
               </div>
               <div className="text-center">
-                <Button
-                  variant="outline"
-                  className="cursor-pointer mt-5 rounded-sm w-1/3"
-                >
-                  <PlusCircle />
-                  Add Task
-                </Button>
+                <AddTask />
               </div>
             </DroppableColumn>
           ))}
