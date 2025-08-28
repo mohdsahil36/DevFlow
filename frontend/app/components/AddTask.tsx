@@ -87,13 +87,8 @@ export default function AddTask() {
                   </div>
                 </div>
               </div>
+              <Button className="cursor-pointer text-white">Submit</Button>
             </form>
-          </div>
-          <div className="grid grid-cols-2 gap-3 w-1/3 mt-6 place-self-end">
-            <Button variant="ghost" className="cursor-pointer">
-              Cancel
-            </Button>
-            <Button className="cursor-pointer text-white">Submit</Button>
           </div>
         </DialogContent>
       </Dialog>
