@@ -14,10 +14,6 @@ const columns: Column[] = [
   { status: "Done", tasks: [] },
 ];
 
-type AddTaskProps = {
-  setFormData: (data: TaskFormData) => void;
-};
-
 // Droppable column component
 function DroppableColumn({
   children,
@@ -74,7 +70,6 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
 
 export default function KanbanBoard() {
   const [columnData, setColumnData] = useState<Column[]>(columns);
-  const [newTaskData, setNewTaskData] = useState<TaskFormData | null>(null);
   const { data: fetchedData } = useDataFetch("/kanban");
 
   useEffect(() => {
@@ -191,9 +186,8 @@ export default function KanbanBoard() {
                   <p className="text-sm text-gray-200 italic">No tasks</p>
                 )}
               </div>
-              <div className="text-center">
-                <AddTask setFormData={setNewTaskData} />
-              </div>
+
+              <AddTask status={item.status} />
             </DroppableColumn>
           ))}
         </div>

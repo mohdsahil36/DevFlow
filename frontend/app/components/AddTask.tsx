@@ -19,12 +19,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { z } from "zod";
 import { useState } from "react";
 import { TaskFormData } from "@/zod/taskTypes";
 
 type AddTaskProps = {
-  setFormData: (data: TaskFormData) => void;
+  status: string;
 };
 
 const initialFormData = {
@@ -40,11 +39,36 @@ export default function AddTask(props: AddTaskProps) {
   );
   const [open, setOpen] = useState(false);
 
-  function submitForm(e: React.FormEvent) {
+  async function submitForm(e: React.FormEvent) {
     e.preventDefault();
+    const newTask = {
+      ...formData,
+      status: props.status,
+      _id: crypto.randomUUID(),
+    };
+
     setFormData(initialFormData as TaskFormData);
     setOpen(false);
-    props.setFormData(formData);
+
+    try {
+      const response = await fetch(`http://localhost:8080/kanban`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newTask),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to add new task:", errorData);
+      } else {
+        const result = await response.json();
+        console.log("Task added successfully:", result);
+      }
+    } catch (error) {
+      console.error("Error adding new task", error);
+    }
   }
   return (
     <div className="w-auto">
