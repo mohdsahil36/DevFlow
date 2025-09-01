@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+// import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -9,6 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -37,7 +47,6 @@ export default function AddTask(props: AddTaskProps) {
   const [formData, setFormData] = useState<TaskFormData>(
     initialFormData as TaskFormData
   );
-  const [open, setOpen] = useState(false);
 
   async function submitForm(e: React.FormEvent) {
     e.preventDefault();
@@ -48,7 +57,6 @@ export default function AddTask(props: AddTaskProps) {
     };
 
     setFormData(initialFormData as TaskFormData);
-    setOpen(false);
 
     try {
       const response = await fetch(`http://localhost:8080/kanban`, {
@@ -72,27 +80,26 @@ export default function AddTask(props: AddTaskProps) {
   }
   return (
     <div className="w-auto">
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
+      <Drawer direction="right">
+        <DrawerTrigger asChild>
           <Button
             variant="outline"
             className="cursor-pointer mt-5 rounded-sm w-1/3"
-            onClick={() => setOpen(true)}
           >
             <PlusCircle />
             Add Task
           </Button>
-        </DialogTrigger>
-        <DialogContent>
+        </DrawerTrigger>
+        <DrawerContent className="min-w-[40rem]">
           <DialogTitle className="hidden">New task</DialogTitle>
-          <div className="mt-3">
+          <div className="mt-3 p-7">
             <form action="submit" onSubmit={submitForm}>
-              <div className="flex flex-col gap-y-3.5">
+              <div className="flex flex-col gap-y-6">
                 <div>
                   <Label htmlFor="Task Name">Title</Label>
                   <Input
                     placeholder="Enter task title"
-                    className="mt-3"
+                    className="mt-3 h-12"
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
@@ -103,7 +110,7 @@ export default function AddTask(props: AddTaskProps) {
                   <Label>Description</Label>
                   <Textarea
                     placeholder="Enter task details"
-                    className="mt-3"
+                    className="mt-3 h-12"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
@@ -168,15 +175,17 @@ export default function AddTask(props: AddTaskProps) {
                 </div>
               </div>
               <div className="mt-4 text-right grid grid-flow-col gap-4">
-                <Button className="cursor-pointer" variant="outline">
-                  Cancel
-                </Button>
-                <Button className="cursor-pointer text-white ">Submit</Button>
+                <Button className="cursor-pointer text-white">Submit</Button>
+                <DrawerClose>
+                  <Button className="cursor-pointer" variant="outline">
+                    Cancel
+                  </Button>
+                </DrawerClose>
               </div>
             </form>
           </div>
-        </DialogContent>
-      </Dialog>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
