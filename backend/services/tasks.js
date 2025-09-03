@@ -79,3 +79,23 @@ export const addNewTask = async (req, res) => {
     });
   }
 };
+
+export const deleteTask = async (req, res) => {
+  console.log("deleteTask called with id:", req.params.id);
+  try {
+    const taskID = req.params.id;
+
+    const updatedTasks = await TaskModel.deleteOne({ _id: taskID });
+    res.json({
+      success: true,
+      message: "Task deleted successfully",
+      data: updatedTasks,
+    });
+  } catch (error) {
+    console.error("Error while deleting task:", error);
+    res.status(500).json({
+      error: "Failed to process task update",
+      details: err.message,
+    });
+  }
+};

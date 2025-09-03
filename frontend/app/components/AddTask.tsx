@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-// import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
 import {
   Select,
   SelectContent,
@@ -93,7 +93,7 @@ export default function AddTask(props: AddTaskProps) {
         <DrawerContent className="min-w-[40rem]">
           <DialogTitle className="hidden">New task</DialogTitle>
           <div className="mt-3 p-7">
-            <form action="submit" onSubmit={submitForm}>
+            <form onSubmit={submitForm}>
               <div className="flex flex-col gap-y-6">
                 <div>
                   <Label htmlFor="Task Name">Title</Label>
@@ -174,26 +174,26 @@ export default function AddTask(props: AddTaskProps) {
                   </div>
                 </div>
               </div>
+              <div className="flex justify-end gap-4 mt-8">
+                <Button
+                  className="cursor-pointer text-white"
+                  type="submit"
+                  // form="task-form"
+                >
+                  Add Task
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="cursor-pointer"
+                  onClick={() => setFormData(initialFormData as TaskFormData)}
+                >
+                  Reset
+                </Button>
+                <DrawerClose className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-100">
+                  Cancel
+                </DrawerClose>
+              </div>
             </form>
-            <div className="flex justify-end gap-4 mt-8">
-              <Button
-                className="cursor-pointer text-white"
-                type="submit"
-                form="task-form"
-              >
-                Add Task
-              </Button>
-              <Button
-                variant="secondary"
-                className="cursor-pointer"
-                onClick={() => setFormData(initialFormData as TaskFormData)}
-              >
-                Reset
-              </Button>
-              <DrawerClose className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-100">
-                Cancel
-              </DrawerClose>
-            </div>
           </div>
         </DrawerContent>
       </Drawer>
