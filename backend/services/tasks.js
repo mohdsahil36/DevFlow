@@ -19,6 +19,25 @@ export const getAllTasks = async (req, res) => {
   }
 };
 
+export const getTaskById = async (req, res) => {
+  const taskId = req.params.id;
+  try {
+    const taskData = await TaskModel.findById(taskId);
+
+    res.json({
+      success: true,
+      message: "Specific data is fetched!",
+      data: taskData,
+    });
+  } catch (err) {
+    console.error("Error fetching the specific task data:", err);
+    res.status(500).json({
+      error: "Failed to fetch task specific data",
+      error: err.message,
+    });
+  }
+};
+
 export const updateTasks = async (req, res) => {
   try {
     const taskId = req.params.id;
