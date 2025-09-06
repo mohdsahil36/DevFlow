@@ -7,6 +7,7 @@ import AddTask from "../components/AddTask";
 import { DragEndEvent } from "@dnd-kit/core";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
 import { Edit, GripVertical, Trash2 } from "lucide-react";
+import { TaskFormData } from "@/zod/taskTypes";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
@@ -36,8 +37,15 @@ function DroppableColumn({
 }
 
 // Draggable task component
-function DraggableTask({ task, index }: { task: Task; index: number }) {
-  const [taskIdData, setTaskIdData] = useState<Task | null>(null);
+function DraggableTask({
+  task,
+  setSelectedData,
+  setOpenModal,
+}: {
+  task: Task;
+  setSelectedData: (task: Task | null) => void;
+  setOpenModal: (open: boolean) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
     data: {
@@ -57,7 +65,8 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
       headers: { "Content-Type": "application/json" },
     });
     const data = await response.json();
-    setTaskIdData(data);
+    setSelectedData(data);
+    setOpenModal(true);
   }
 
   async function deleteHandler(taskId: string) {
@@ -119,6 +128,8 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
 
 export default function KanbanBoard() {
   const [columnData, setColumnData] = useState<Column[]>(columns);
+  const [selectedData, setSelectedData] = useState<Task | null>(null);
+  const [openModal, setOpenModal] = useState(false);
   const { data: fetchedData } = useDataFetch("/kanban");
 
   useEffect(() => {
@@ -229,14 +240,24 @@ export default function KanbanBoard() {
               <div className="space-y-4">
                 {item.tasks.length > 0 ? (
                   item.tasks.map((task, index) => (
-                    <DraggableTask key={task._id} task={task} index={index} />
+                    <DraggableTask
+                      key={task._id}
+                      task={task}
+                      setSelectedData={setSelectedData}
+                      setOpenModal={setOpenModal}
+                    />
                   ))
                 ) : (
                   <p className="text-sm text-gray-200 italic">No tasks</p>
                 )}
               </div>
 
-              <AddTask status={item.status} />
+              <AddTask
+                status={item.status}
+                openModal={openModal}
+                setOpenModal={setOpenModal}
+                selectedData={selectedData as TaskFormData}
+              />
             </DroppableColumn>
           ))}
         </div>
