@@ -8,6 +8,7 @@ import { DragEndEvent } from "@dnd-kit/core";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
 import { Edit, GripVertical, Trash2 } from "lucide-react";
 import { TaskFormData } from "@/zod/taskTypes";
+import { Button } from "@/components/ui/button";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
@@ -41,10 +42,12 @@ function DraggableTask({
   task,
   setSelectedData,
   setOpenModal,
+  setActiveStatus,
 }: {
   task: Task;
-  setSelectedData: (task: Task | null) => void;
+  setSelectedData: (task: TaskFormData | null) => void;
   setOpenModal: (open: boolean) => void;
+  setActiveStatus: (status: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
@@ -66,6 +69,7 @@ function DraggableTask({
     });
     const data = await response.json();
     setSelectedData(data);
+    setActiveStatus(data.status);
     setOpenModal(true);
   }
 
@@ -106,13 +110,7 @@ function DraggableTask({
       </div>
 
       <div className="flex justify-between items-start">
-        <div>
-          <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-          <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
-            <p>Priority: {task.priority}</p>
-            <p>Due: {task.due_date}</p>
-          </div>
-        </div>
+        <p className="text-sm text-gray-600 mb-2">{task.description}</p>
         <div className="flex flex-row gap-2">
           <button type="button" onClick={() => editHandler(task._id)}>
             <Edit className="size-4 cursor-pointer hover:text-blue-400" />
@@ -122,32 +120,32 @@ function DraggableTask({
           </button>
         </div>
       </div>
+      <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
+        <p>Priority: {task.priority}</p>
+        <p>Due: {task.due_date}</p>
+      </div>
     </div>
   );
 }
 
 export default function KanbanBoard() {
   const [columnData, setColumnData] = useState<Column[]>(columns);
-  const [selectedData, setSelectedData] = useState<Task | null>(null);
+  const [activeStatus, setActiveStatus] = useState<string>("To Do");
+  const [selectedData, setSelectedData] = useState<TaskFormData | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const { data: fetchedData } = useDataFetch("/kanban");
 
   useEffect(() => {
     if (fetchedData && Array.isArray(fetchedData)) {
-      setColumnData((prevColumns) =>
-        prevColumns.map((column) => {
-          const tasksForColumn: Task[] = fetchedData.filter((item) => {
-            const taskStatus = item.status || "To Do";
-            const columnStatus = column.status;
-
-            return (
-              taskStatus.toLowerCase().trim() ===
-              columnStatus.toLowerCase().trim()
-            );
-          });
-
-          return { ...column, tasks: tasksForColumn };
-        })
+      setColumnData(
+        columns.map((column) => ({
+          ...column,
+          tasks: fetchedData.filter(
+            (item) =>
+              (item.status || "To Do").toLowerCase().trim() ===
+              column.status.toLowerCase().trim()
+          ),
+        }))
       );
     }
   }, [fetchedData]);
@@ -245,23 +243,34 @@ export default function KanbanBoard() {
                       task={task}
                       setSelectedData={setSelectedData}
                       setOpenModal={setOpenModal}
+                      setActiveStatus={setActiveStatus}
                     />
                   ))
                 ) : (
                   <p className="text-sm text-gray-200 italic">No tasks</p>
                 )}
               </div>
-
-              <AddTask
-                status={item.status}
-                openModal={openModal}
-                setOpenModal={setOpenModal}
-                selectedData={selectedData as TaskFormData}
-              />
+              <Button
+                variant="outline"
+                className="mt-5 cursor-pointer"
+                onClick={() => {
+                  setSelectedData(null);
+                  setActiveStatus(item.status);
+                  setOpenModal(true);
+                }}
+              >
+                + Add Task
+              </Button>
             </DroppableColumn>
           ))}
         </div>
       </DndContext>
+      <AddTask
+        status={activeStatus}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        selectedData={selectedData}
+      />
     </div>
   );
 }
