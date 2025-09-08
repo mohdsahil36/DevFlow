@@ -27,15 +27,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TaskFormData } from "@/zod/taskTypes";
 
 type AddTaskProps = {
   status: string;
   openModal: boolean;
-  selectedData: TaskFormData | null;
+  selectedData?: any;
   setOpenModal: (open: boolean) => void;
 };
 
@@ -50,9 +49,27 @@ export default function AddTask(props: AddTaskProps) {
   const [formData, setFormData] = useState<TaskFormData>(
     initialFormData as TaskFormData
   );
+  const editTaskData = props.selectedData;
+
+  useEffect(() => {
+    if (editTaskData && editTaskData.data) {
+      const taskData = editTaskData.data;
+      setFormData({
+        title: taskData.title || "",
+        description: taskData.description || "",
+        priority:
+          (taskData.priority?.toLowerCase() as "low" | "medium" | "high") ||
+          "low",
+        dueDate: taskData.due_date ? new Date(taskData.due_date) : undefined,
+        status: props.status,
+        _id: taskData._id || crypto.randomUUID(),
+      });
+    } else {
+      setFormData(initialFormData as TaskFormData);
+    }
+  }, [editTaskData, props.status]);
 
   async function submitForm(e: React.FormEvent) {
-    console.log("Status recieved:", props.status);
     e.preventDefault();
     const newTask = {
       ...formData,
@@ -172,7 +189,7 @@ export default function AddTask(props: AddTaskProps) {
               </div>
               <div className="flex justify-end gap-4 mt-8">
                 <Button className="cursor-pointer text-white" type="submit">
-                  Add Task
+                  {props.selectedData ? "Update Task" : "Add Task"}
                 </Button>
                 <Button
                   variant="secondary"

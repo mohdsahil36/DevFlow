@@ -38,7 +38,7 @@ export const getTaskById = async (req, res) => {
   }
 };
 
-export const updateTasks = async (req, res) => {
+export const updateTasksStatus = async (req, res) => {
   try {
     const taskId = req.params.id;
     const status = req.query.status;
@@ -100,7 +100,6 @@ export const addNewTask = async (req, res) => {
 };
 
 export const deleteTask = async (req, res) => {
-  console.log("deleteTask called with id:", req.params.id);
   try {
     const taskID = req.params.id;
 
@@ -112,6 +111,32 @@ export const deleteTask = async (req, res) => {
     });
   } catch (error) {
     console.error("Error while deleting task:", error);
+    res.status(500).json({
+      error: "Failed to process task update",
+      details: error.message,
+    });
+  }
+};
+
+export const updatedTasks = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const updateData = req.body;
+
+    const { _id, ...dataToUpdate } = updateData;
+
+    const updatedTask = await TaskModel.findByIdAndUpdate(
+      taskId,
+      dataToUpdate,
+      { new: true }
+    );
+    res.json({
+      success: true,
+      message: "Task updated successfully",
+      data: updatedTask,
+    });
+  } catch (err) {
+    console.error("Error while updating task:", err);
     res.status(500).json({
       error: "Failed to process task update",
       details: err.message,
