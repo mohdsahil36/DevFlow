@@ -123,6 +123,7 @@ export const updatedTasks = async (req, res) => {
     const taskId = req.params.id;
     const updateData = req.body;
 
+    // Remove id from the incoming data and store the rest of the data in dataToUpdate
     const { _id, ...dataToUpdate } = updateData;
 
     const updatedTask = await TaskModel.findByIdAndUpdate(
