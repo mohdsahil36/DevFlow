@@ -44,11 +44,13 @@ function DraggableTask({
   setSelectedData,
   setOpenModal,
   setActiveStatus,
+  onTaskDelete,
 }: {
   task: Task;
   setSelectedData: (task: TaskFormData | null) => void;
   setOpenModal: (open: boolean) => void;
   setActiveStatus: (status: string) => void;
+  onTaskDelete: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
@@ -74,26 +76,6 @@ function DraggableTask({
     setOpenModal(true);
   }
 
-  async function deleteHandler(taskId: string) {
-    <DeleteConfirmation />;
-    try {
-      const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to delete task!", errorData);
-      } else {
-        const result = await response.json();
-        console.log("Task deleted successfully!", result);
-      }
-    } catch (error) {
-      console.error("Error deleting task!", error);
-    }
-  }
-
   return (
     <div
       ref={setNodeRef}
@@ -117,9 +99,8 @@ function DraggableTask({
           <button type="button" onClick={() => editHandler(task._id)}>
             <Edit className="size-4 cursor-pointer hover:text-blue-400" />
           </button>
-          <button type="button">
-            <DeleteConfirmation />
-          </button>
+
+          <DeleteConfirmation taskId={task._id} onTaskDelete={onTaskDelete} />
         </div>
       </div>
       <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
@@ -151,6 +132,25 @@ export default function KanbanBoard() {
       );
     }
   }, [fetchedData]);
+
+  const deleteHandler = useCallback(async (taskId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to delete task!", errorData);
+      } else {
+        const result = await response.json();
+        console.log("Task deleted successfully!", result);
+      }
+    } catch (error) {
+      console.error("Error deleting task!", error);
+    }
+  }, []);
 
   //function for the drag over event
   const handleDragEvent = useCallback(async (event: DragEndEvent) => {
@@ -246,6 +246,7 @@ export default function KanbanBoard() {
                       setSelectedData={setSelectedData}
                       setOpenModal={setOpenModal}
                       setActiveStatus={setActiveStatus}
+                      onTaskDelete={deleteHandler}
                     />
                   ))
                 ) : (
