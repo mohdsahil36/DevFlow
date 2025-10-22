@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
+import { SidebarProvider,SidebarTrigger } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/ui/sidebar";
+
 // Fonts
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
@@ -39,7 +42,13 @@ export default function RootLayout({
       <body
         className={`${ibmPlexMono.className} ${geist.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SidebarProvider>
+          <Sidebar/>
+          <main className="w-full">
+            <SidebarTrigger className="cursor-pointer"/>
+          {children}
+          </main>
+        </SidebarProvider>
       </body>
     </html>
   );
