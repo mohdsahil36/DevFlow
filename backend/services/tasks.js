@@ -24,7 +24,7 @@ export const updateTasks = async (req, res) => {
   try {
     // For now, just return success without actually updating the database
     console.log("Received request - Task ID:", req.params.id);
-    console.log("Received request - Status:", req.body.status);
+    console.log("Received request - Status:", req.query.status);
     res.json({
       success: true,
       message: "Task status update logged successfully",
