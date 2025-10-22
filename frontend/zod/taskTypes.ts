@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 
 export const taskValidationSchema = z.object({
   title: z
@@ -11,6 +11,8 @@ export const taskValidationSchema = z.object({
     .max(200, "Description too long!"),
   priority: z.enum(["low", "medium", "high"], "Enter a valid priority value!"),
   dueDate: z.date().optional(),
+  status: z.string().min(1, "Task status is required!"),
+  _id: string(),
 });
 
 export type TaskFormData = z.infer<typeof taskValidationSchema>;

@@ -40,3 +40,42 @@ export const updateTasks = async (req, res) => {
     });
   }
 };
+
+export const addNewTask = async (req, res) => {
+  try {
+    const newTaskData = req.body;
+
+    let dueDateObj;
+    if (newTaskData.dueDate) {
+      dueDateObj =
+        typeof newTaskData.dueDate === "string"
+          ? new Date(newTaskData.dueDate).toISOString().split("T")[0]
+          : newTaskData.dueDate;
+    }
+
+    const taskToSave = {
+      title: newTaskData.title,
+      description: newTaskData.description,
+      priority:
+        newTaskData.priority.charAt(0).toUpperCase() +
+        newTaskData.priority.slice(1),
+      due_date: dueDateObj,
+      status: newTaskData.status,
+    };
+
+    const newlyAdded = await TaskModel.create(taskToSave);
+
+    res.status(201).json({
+      success: true,
+      message: "Task created successfully",
+      receivedData: newlyAdded,
+    });
+  } catch (error) {
+    console.error("Error while adding new task:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error processing request",
+      details: error.message,
+    });
+  }
+};
