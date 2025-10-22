@@ -34,6 +34,9 @@ import { TaskFormData } from "@/zod/taskTypes";
 
 type AddTaskProps = {
   status: string;
+  openModal: boolean;
+  selectedData: TaskFormData | null;
+  setOpenModal: (open: boolean) => void;
 };
 
 const initialFormData = {
@@ -57,6 +60,7 @@ export default function AddTask(props: AddTaskProps) {
     };
 
     setFormData(initialFormData as TaskFormData);
+    props.setOpenModal(false);
 
     try {
       const response = await fetch(`http://localhost:8080/kanban`, {
@@ -80,11 +84,12 @@ export default function AddTask(props: AddTaskProps) {
   }
   return (
     <div className="w-auto">
-      <Drawer direction="right">
+      <Drawer direction="right" open={props.openModal}>
         <DrawerTrigger asChild>
           <Button
             variant="outline"
             className="cursor-pointer mt-5 rounded-sm w-1/3"
+            onClickCapture={() => props.setOpenModal(true)}
           >
             <PlusCircle />
             Add Task
@@ -189,7 +194,10 @@ export default function AddTask(props: AddTaskProps) {
                 >
                   Reset
                 </Button>
-                <DrawerClose className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-100">
+                <DrawerClose
+                  className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-100"
+                  onClick={() => props.setOpenModal(false)}
+                >
                   Cancel
                 </DrawerClose>
               </div>
