@@ -21,21 +21,11 @@ import { PlusCircle } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { z } from "zod";
 import { useState } from "react";
+import { TaskFormData } from "@/zod/taskTypes";
 
-const taskValidationSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Task title is required!")
-    .max(100, "Title too long!"),
-  description: z
-    .string()
-    .min(1, "Task description is required!")
-    .max(200, "Description too long!"),
-  priority: z.enum(["low", "medium", "high"], "Enter a valid priority value!"),
-  dueDate: z.date().optional(),
-});
-
-type TaskFormData = z.infer<typeof taskValidationSchema>;
+type AddTaskProps = {
+  setFormData: (data: TaskFormData) => void;
+};
 
 const initialFormData = {
   title: "",
@@ -44,7 +34,7 @@ const initialFormData = {
   dueDate: undefined,
 };
 
-export default function AddTask() {
+export default function AddTask(props: AddTaskProps) {
   const [formData, setFormData] = useState<TaskFormData>(
     initialFormData as TaskFormData
   );
@@ -54,7 +44,7 @@ export default function AddTask() {
     e.preventDefault();
     setFormData(initialFormData as TaskFormData);
     setOpen(false);
-    console.log(formData);
+    props.setFormData(formData);
   }
   return (
     <div className="w-auto">

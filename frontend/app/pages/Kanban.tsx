@@ -6,12 +6,17 @@ import { Task, Column } from "../types/types";
 import AddTask from "../components/AddTask";
 import { DragEndEvent } from "@dnd-kit/core";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
+import { TaskFormData } from "@/zod/taskTypes";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
   { status: "In Progress", tasks: [] },
   { status: "Done", tasks: [] },
 ];
+
+type AddTaskProps = {
+  setFormData: (data: TaskFormData) => void;
+};
 
 // Droppable column component
 function DroppableColumn({
@@ -69,6 +74,7 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
 
 export default function KanbanBoard() {
   const [columnData, setColumnData] = useState<Column[]>(columns);
+  const [newTaskData, setNewTaskData] = useState<TaskFormData | null>(null);
   const { data: fetchedData } = useDataFetch("/kanban");
 
   useEffect(() => {
@@ -186,7 +192,7 @@ export default function KanbanBoard() {
                 )}
               </div>
               <div className="text-center">
-                <AddTask />
+                <AddTask setFormData={setNewTaskData} />
               </div>
             </DroppableColumn>
           ))}
