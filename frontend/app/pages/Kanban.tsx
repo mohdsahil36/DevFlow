@@ -6,7 +6,7 @@ import { Task, Column } from "../types/types";
 import AddTask from "../components/AddTask";
 import { DragEndEvent } from "@dnd-kit/core";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
-import { TaskFormData } from "@/zod/taskTypes";
+import { GripVertical, Trash2 } from "lucide-react";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
@@ -50,20 +50,54 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
       }
     : undefined;
 
+  async function deleteHandler(taskId: string) {
+    try {
+      const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to delete task!", errorData);
+      } else {
+        const result = await response.json();
+        console.log("Task deleted successfully!", result);
+      }
+    } catch (error) {
+      console.error("Error deleting task!", error);
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
-      className={`p-3 bg-gray-50 rounded shadow-md text-left cursor-grab active:cursor-grabbing`}
+      className="p-3 bg-gray-50 rounded shadow-md text-left"
     >
-      <h3 className="font-semibold text-gray-800">{task.title}</h3>
-      <p className="text-sm text-gray-600">{task.description}</p>
-      <div className="flex justify-between mt-2 text-xs text-gray-500">
+      {/* Only this div is draggable */}
+      <div
+        {...listeners}
+        {...attributes}
+        className="flex items-center gap-2 cursor-grab active:cursor-grabbing mb-2"
+        style={{ userSelect: "none" }}
+      >
+        <GripVertical className="text-gray-400" />
+        <span className="font-semibold text-gray-800">{task.title}</span>
+      </div>
+      {/* All other content is NOT draggable */}
+      <p className="text-sm text-gray-600 mb-2">{task.description}</p>
+      <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
         <p>Priority: {task.priority}</p>
         <p>Due: {task.due_date}</p>
       </div>
+      <button
+        type="button"
+        onClick={() => deleteHandler(task._id)}
+        className="ml-2"
+      >
+        <Trash2 className="size-4 cursor-pointer hover:text-red-400" />
+      </button>
     </div>
   );
 }
