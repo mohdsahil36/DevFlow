@@ -10,15 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -27,9 +26,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import { useState, useEffect } from "react";
 import { TaskFormData } from "@/zod/taskTypes";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 type AddTaskProps = {
   status: string;
@@ -80,9 +79,20 @@ export default function AddTask(props: AddTaskProps) {
     setFormData(initialFormData as TaskFormData);
     props.setOpenModal(false);
 
+    const isEditMode = editTaskData && editTaskData.data;
+
     try {
-      const response = await fetch(`http://localhost:8080/kanban`, {
-        method: "POST",
+      let url, method;
+
+      if (isEditMode) {
+        url = `http://localhost:8080/kanban/${formData._id}`;
+        method = "PUT";
+      } else {
+        url = `http://localhost:8080/kanban`;
+        method = "POST";
+      }
+      const response = await fetch(`${url}`, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -91,19 +101,32 @@ export default function AddTask(props: AddTaskProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Failed to add new task:", errorData);
+        console.error(
+          `Failed to ${isEditMode ? "update" : "add"} task:`,
+          errorData
+        );
       } else {
         const result = await response.json();
-        console.log("Task added successfully:", result);
+        console.log(
+          `Task ${isEditMode ? "updated" : "added"} successfully:`,
+          result
+        );
       }
     } catch (error) {
       console.error("Error adding new task", error);
     }
   }
+
+  const handleDialogClose = (open: boolean) => {
+    props.setOpenModal(open);
+    if (!open) {
+      setFormData(initialFormData as TaskFormData);
+    }
+  };
   return (
     <div className="w-auto">
-      <Drawer direction="right" open={props.openModal}>
-        <DrawerContent className="min-w-[40rem]">
+      <Dialog onOpenChange={handleDialogClose} open={props.openModal}>
+        <DialogContent className="min-w-[40rem]">
           <DialogTitle className="hidden">New task</DialogTitle>
           <div className="mt-3 p-7">
             <form onSubmit={submitForm}>
@@ -198,17 +221,18 @@ export default function AddTask(props: AddTaskProps) {
                 >
                   Reset
                 </Button>
-                <DrawerClose
-                  className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-100"
+                <DialogClose
+                  className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  type="button"
                   onClick={() => props.setOpenModal(false)}
                 >
                   Cancel
-                </DrawerClose>
+                </DialogClose>
               </div>
             </form>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

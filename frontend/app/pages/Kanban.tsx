@@ -9,6 +9,7 @@ import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
 import { Edit, GripVertical, Trash2 } from "lucide-react";
 import { TaskFormData } from "@/zod/taskTypes";
 import { Button } from "@/components/ui/button";
+import DeleteConfirmation from "../components/DeleteConfirmation";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
@@ -74,6 +75,7 @@ function DraggableTask({
   }
 
   async function deleteHandler(taskId: string) {
+    <DeleteConfirmation />;
     try {
       const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
         method: "DELETE",
@@ -115,8 +117,8 @@ function DraggableTask({
           <button type="button" onClick={() => editHandler(task._id)}>
             <Edit className="size-4 cursor-pointer hover:text-blue-400" />
           </button>
-          <button type="button" onClick={() => deleteHandler(task._id)}>
-            <Trash2 className="size-4 cursor-pointer hover:text-red-400" />
+          <button type="button">
+            <DeleteConfirmation />
           </button>
         </div>
       </div>
