@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
 import {
   Select,
   SelectContent,
@@ -12,12 +11,8 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-
 import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -29,11 +24,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { TaskFormData } from "@/zod/taskTypes";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { useTaskStore } from "../../store/taskStore";
+import type { Task } from "@/app/types/types";
+
 
 type AddTaskProps = {
   status: string;
   openModal: boolean;
-  selectedData?: any;
+  selectedData?: { success?: boolean; data: Task };
   setOpenModal: (open: boolean) => void;
 };
 
@@ -49,9 +47,11 @@ export default function AddTask(props: AddTaskProps) {
     initialFormData as TaskFormData
   );
   const editTaskData = props.selectedData;
-
+  
+  // Destructure from the hook
+  const { addOrEditTask } = useTaskStore();
   useEffect(() => {
-    if (editTaskData && editTaskData.data) {
+    if (editTaskData) {
       const taskData = editTaskData.data;
       setFormData({
         title: taskData.title || "",
@@ -66,54 +66,30 @@ export default function AddTask(props: AddTaskProps) {
     } else {
       setFormData(initialFormData as TaskFormData);
     }
-  }, [editTaskData, props.status]);
-
+  }, [editTaskData, props.status]); // undefined
   async function submitForm(e: React.FormEvent) {
     e.preventDefault();
-    const newTask = {
+    
+    const isEditMode = !!(editTaskData && editTaskData.data);
+    
+    const taskToSubmit = {
       ...formData,
       status: props.status,
-      _id: crypto.randomUUID(),
+      _id: isEditMode ? formData._id : crypto.randomUUID(),
     };
-
-    setFormData(initialFormData as TaskFormData);
-    props.setOpenModal(false);
-
-    const isEditMode = editTaskData && editTaskData.data;
-
+  
     try {
-      let url, method;
-
-      if (isEditMode) {
-        url = `http://localhost:8080/kanban/${formData._id}`;
-        method = "PUT";
-      } else {
-        url = `http://localhost:8080/kanban`;
-        method = "POST";
+      const result = await addOrEditTask(taskToSubmit, isEditMode);
+      if (!result?.success) {
+        console.error(`Failed to ${isEditMode ? "update" : "add"} task:`, result);
+        return;
       }
-      const response = await fetch(`${url}`, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newTask),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error(
-          `Failed to ${isEditMode ? "update" : "add"} task:`,
-          errorData
-        );
-      } else {
-        const result = await response.json();
-        console.log(
-          `Task ${isEditMode ? "updated" : "added"} successfully:`,
-          result
-        );
-      }
+      console.log(`Task ${isEditMode ? "updated" : "added"} successfully:`, result);
+      
+      setFormData(initialFormData as TaskFormData);
+      props.setOpenModal(false);
     } catch (error) {
-      console.error("Error adding new task", error);
+      console.error("Error adding/updating task", error);
     }
   }
 
@@ -123,6 +99,7 @@ export default function AddTask(props: AddTaskProps) {
       setFormData(initialFormData as TaskFormData);
     }
   };
+
   return (
     <div className="w-auto">
       <Dialog onOpenChange={handleDialogClose} open={props.openModal}>

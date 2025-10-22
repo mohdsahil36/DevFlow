@@ -1,37 +1,21 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-// Database connection
-const connectionURL = process.env.MONGO_DB_CONNECTION_URL;
-
-if (!connectionURL) {
-  console.error("MONGO_DB_CONNECTION_URL is not defined in .env file");
-  process.exit(1);
-}
-
-mongoose
-  .connect(connectionURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Successfully connected to MongoDB Database");
-  })
-  .catch((err) => {
-    console.error("Error connecting to Database:", err);
-    process.exit(1);
-  });
 
 const TaskSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  due_date: String,
-  priority: String,
-  status: { type: String, default: "To Do" }, // Add status field for column categorization
-});
+  title: { type: String, required: true, trim: true },
+  description: { type: String, trim: true },
+  due_date: { type: Date },
+  priority: {
+    type: String,
+    enum: ["Low", "Medium", "High"],
+    default: "Medium",
+  },
+  status: {
+    type: String,
+    enum: ["To Do", "In Progress", "Done"],
+    default: "To Do",
+  },
+}, { timestamps: true });
 
-const TaskModel = mongoose.model("Tasks", TaskSchema, "tasks");
+const Task = mongoose.model("Task", TaskSchema);
 
-export default TaskModel;
+export default Task;

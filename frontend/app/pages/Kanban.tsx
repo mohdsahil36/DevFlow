@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import useDataFetch from "../hooks/useDataFetch";
 import { Task, Column } from "../types/types";
 import AddTask from "../components/AddTask";
-import { DragEndEvent } from "@dnd-kit/core";
-import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
-import { Edit, GripVertical, Trash2 } from "lucide-react";
-import { TaskFormData } from "@/zod/taskTypes";
+import {
+  DragEndEvent,
+  DndContext,
+  useDroppable,
+  useDraggable,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+} from "@dnd-kit/core";
+import { Edit, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmation from "../components/DeleteConfirmation";
 import { useTaskStore } from "@/store/taskStore";
@@ -17,7 +24,6 @@ const columns: Column[] = [
   { status: "In Progress", tasks: [] },
   { status: "Done", tasks: [] },
 ];
-
 // Droppable column component
 function DroppableColumn({
   children,
@@ -46,12 +52,16 @@ function DraggableTask({
   setOpenModal,
   setActiveStatus,
   onTaskDelete,
+  editTask,
 }: {
   task: Task;
-  setSelectedData: (task: TaskFormData | null) => void;
+  setSelectedData: (
+    data: { success?: boolean; data: Task } | undefined
+  ) => void;
   setOpenModal: (open: boolean) => void;
   setActiveStatus: (status: string) => void;
   onTaskDelete: (id: string) => void;
+  editTask: (taskId: string) => Promise<Response>;
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
@@ -67,13 +77,10 @@ function DraggableTask({
     : undefined;
 
   async function editHandler(taskId: string) {
-    const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-    setSelectedData(data);
-    setActiveStatus(data.status);
+    const response = await editTask(taskId);
+    const json = await response.json(); // { success, data }
+    setSelectedData(json);
+    setActiveStatus(json?.data?.status || "To Do");
     setOpenModal(true);
   }
 
@@ -88,7 +95,7 @@ function DraggableTask({
         {...listeners}
         {...attributes}
         className="flex items-center gap-2 cursor-grab active:cursor-grabbing mb-2"
-        style={{ userSelect: "none" }}
+        style={{ userSelect: "none", touchAction: "none" }}
       >
         <GripVertical className="text-gray-400" />
         <span className="font-semibold text-gray-800">{task.title}</span>
@@ -106,7 +113,14 @@ function DraggableTask({
       </div>
       <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
         <p>Priority: {task.priority}</p>
-        <p>Due: {task.due_date}</p>
+        <p>
+          Due:{" "}
+          {new Date(task.due_date).toLocaleDateString(undefined, {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}
+        </p>
       </div>
     </div>
   );
@@ -115,17 +129,23 @@ function DraggableTask({
 export default function KanbanBoard() {
   const [columnData, setColumnData] = useState<Column[]>(columns);
   const [activeStatus, setActiveStatus] = useState<string>("To Do");
-  const [selectedData, setSelectedData] = useState<TaskFormData | null>(null);
+  const [selectedData, setSelectedData] = useState<
+    { success?: boolean; data: Task } | undefined
+  >(undefined);
   const [openModal, setOpenModal] = useState(false);
-  const { data: fetchedData } = useDataFetch("/kanban");
-  const { deleteTasks } = useTaskStore();
+  const { tasks, deleteTasks, fetchTasks, updateTaskStatus, editTask } =
+    useTaskStore();
 
   useEffect(() => {
-    if (fetchedData && Array.isArray(fetchedData)) {
+    fetchTasks("kanban");
+  }, [fetchTasks]);
+
+  useEffect(() => {
+    if (tasks && Array.isArray(tasks)) {
       setColumnData(
         columns.map((column) => ({
           ...column,
-          tasks: fetchedData.filter(
+          tasks: tasks.filter(
             (item) =>
               (item.status || "To Do").toLowerCase().trim() ===
               column.status.toLowerCase().trim()
@@ -133,117 +153,121 @@ export default function KanbanBoard() {
         }))
       );
     }
-  }, [fetchedData]);
+  }, [tasks]);
 
-  const deleteHandler = useCallback(async (taskId: string) => {
-    try {
-      // const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
-      //   method: "DELETE",
-      //   headers: { "Content-Type": "application/json" },
-      // });
+  const deleteHandler = useCallback(
+    async (taskId: string) => {
+      try {
+        const response = await deleteTasks(taskId);
 
-      const response = await deleteTasks(taskId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to delete task!", errorData);
-      } else {
-        const result = await response.json();
-        console.log("Task deleted successfully!", result);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Failed to delete task!", errorData);
+        } else {
+          const result = await response.json();
+          console.log("Task deleted successfully!", result);
+        }
+      } catch (error) {
+        console.error("Error deleting task!", error);
       }
-    } catch (error) {
-      console.error("Error deleting task!", error);
-    }
-  }, []);
+    },
+    [deleteTasks]
+  );
 
   //function for the drag over event
-  const handleDragEvent = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEvent = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (!over) return; // if the hover event is not over i.e. we are not over something droppable
+      if (!over) return; // if the hover event is not over i.e. we are not over something droppable
 
-    const taskId = active.id as string; // id of the task being dragged
-    const newStatus = over.id as Task["status"]; // status of the task being dragged
+      const taskId = active.id as string; // id of the task being dragged
+      const newStatus = over.id as Task["status"]; // status of the task being dragged
 
-    // Find the task and move it to the new column
-    setColumnData((prevData) => {
-      // Find the task in the current data
-      let taskToMove: Task | null = null;
-      let sourceColumnIndex = -1;
+      // Find the task and move it to the new column
+      setColumnData((prevData) => {
+        // Find the task in the current data
+        let taskToMove: Task | null = null;
+        let sourceColumnIndex = -1;
 
-      // Find the task and its current column
-      for (let i = 0; i < prevData.length; i++) {
-        const taskIndex = prevData[i].tasks.findIndex(
-          (task) => task._id === taskId
-        );
-        if (taskIndex !== -1) {
-          taskToMove = prevData[i].tasks[taskIndex];
-          sourceColumnIndex = i;
-          break;
+        // Find the task and its current column
+        for (let i = 0; i < prevData.length; i++) {
+          const taskIndex = prevData[i].tasks.findIndex(
+            (task) => task._id === taskId
+          );
+          if (taskIndex !== -1) {
+            taskToMove = prevData[i].tasks[taskIndex];
+            sourceColumnIndex = i;
+            break;
+          }
         }
-      }
 
-      if (!taskToMove) return prevData;
+        if (!taskToMove) return prevData;
 
-      if (taskToMove.status === newStatus) {
-        return prevData;
-      }
-
-      // Create new task with updated status
-      const updatedTask = { ...taskToMove, status: newStatus };
-
-      return prevData.map((column, columnIndex) => {
-        if (columnIndex === sourceColumnIndex) {
-          // Remove task from source column
-          return {
-            ...column,
-            tasks: column.tasks.filter((task) => task._id !== taskId),
-          };
-        } else if (column.status === newStatus) {
-          // Add task to target column
-          return {
-            ...column,
-            tasks: [...column.tasks, updatedTask],
-          };
+        if (taskToMove.status === newStatus) {
+          return prevData;
         }
-        return column;
+
+        // Create new task with updated status
+        const updatedTask = { ...taskToMove, status: newStatus };
+
+        return prevData.map((column, columnIndex) => {
+          if (columnIndex === sourceColumnIndex) {
+            // Remove task from source column
+            return {
+              ...column,
+              tasks: column.tasks.filter((task) => task._id !== taskId),
+            };
+          } else if (column.status === newStatus) {
+            // Add task to target column
+            return {
+              ...column,
+              tasks: [...column.tasks, updatedTask],
+            };
+          }
+          return column;
+        });
       });
-    });
 
-    // Update the task status in the backend
-    try {
-      const response = await fetch(
-        `http://localhost:8080/tasks/${taskId}/status?status=${newStatus}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      // Update the task status in the backend
+      try {
+        const response = await updateTaskStatus(taskId, newStatus);
+        if (!response.ok) {
+          console.error("Failed to update task status in backend");
         }
-      );
-
-      if (!response.ok) {
-        console.error("Failed to update task status in backend");
+      } catch (error) {
+        console.error("Error updating task status:", error);
       }
-    } catch (error) {
-      console.error("Error updating task status:", error);
-    }
-  }, []);
+    },
+    [updateTaskStatus]
+  );
+
+  // sensor for dnd for mobile screens
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 2000, //prevent accidental scrolls
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
 
   return (
-    <div className="p-12">
+    <div className="px-4 py-8 md:p-12">
       <h1 className="text-2xl font-semibold mb-6">Kanban Workspace</h1>
 
-      <DndContext onDragEnd={handleDragEvent}>
-        <div className="flex gap-4 mt-6">
+      <DndContext onDragEnd={handleDragEvent} sensors={sensors}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           {columnData.map((item, itemindex) => (
-            <DroppableColumn key={itemindex} id={item.status} className="w-1/3">
+            <DroppableColumn key={itemindex} id={item.status} className="">
               <h2 className="font-semibold mb-3 p-2 rounded">
                 {item.status} ({item.tasks.length})
               </h2>
               <div className="space-y-4">
                 {item.tasks.length > 0 ? (
-                  item.tasks.map((task, index) => (
+                  item.tasks.map((task) => (
                     <DraggableTask
                       key={task._id}
                       task={task}
@@ -251,6 +275,7 @@ export default function KanbanBoard() {
                       setOpenModal={setOpenModal}
                       setActiveStatus={setActiveStatus}
                       onTaskDelete={deleteHandler}
+                      editTask={editTask}
                     />
                   ))
                 ) : (
@@ -261,7 +286,7 @@ export default function KanbanBoard() {
                 variant="outline"
                 className="mt-5 cursor-pointer"
                 onClick={() => {
-                  setSelectedData(null);
+                  setSelectedData(undefined);
                   setActiveStatus(item.status);
                   setOpenModal(true);
                 }}
