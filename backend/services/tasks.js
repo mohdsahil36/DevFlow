@@ -4,7 +4,6 @@ import TaskModel from "../models/connection_modal.js";
 export const getAllTasks = async (req, res) => {
   try {
     const tasks = await TaskModel.find();
-    console.log(`Successfully fetched ${tasks.length} tasks from database`);
 
     res.json({
       success: true,
@@ -22,14 +21,16 @@ export const getAllTasks = async (req, res) => {
 
 export const updateTasks = async (req, res) => {
   try {
-    // For now, just return success without actually updating the database
-    console.log("Received request - Task ID:", req.params.id);
-    console.log("Received request - Status:", req.query.status);
+    const taskId = req.params.id;
+    const status = req.query.status;
+
+    const updatedTasks = await TaskModel.findByIdAndUpdate(taskId, {
+      status: status,
+    });
+
     res.json({
       success: true,
-      message: "Task status update logged successfully",
-      taskId: req.params.id,
-      newStatus: req.body.status,
+      data: updatedTasks,
     });
   } catch (err) {
     console.error("Error in updateTasks:", err);
