@@ -10,6 +10,7 @@ import { Edit, GripVertical, Trash2 } from "lucide-react";
 import { TaskFormData } from "@/zod/taskTypes";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmation from "../components/DeleteConfirmation";
+import { useTaskStore } from "@/store/taskStore";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
@@ -117,6 +118,7 @@ export default function KanbanBoard() {
   const [selectedData, setSelectedData] = useState<TaskFormData | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const { data: fetchedData } = useDataFetch("/kanban");
+  const { deleteTasks } = useTaskStore();
 
   useEffect(() => {
     if (fetchedData && Array.isArray(fetchedData)) {
@@ -135,10 +137,12 @@ export default function KanbanBoard() {
 
   const deleteHandler = useCallback(async (taskId: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
+      // const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
+      //   method: "DELETE",
+      //   headers: { "Content-Type": "application/json" },
+      // });
+
+      const response = await deleteTasks(taskId);
 
       if (!response.ok) {
         const errorData = await response.json();
