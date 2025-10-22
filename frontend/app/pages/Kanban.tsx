@@ -6,7 +6,7 @@ import { Task, Column } from "../types/types";
 import AddTask from "../components/AddTask";
 import { DragEndEvent } from "@dnd-kit/core";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
-import { GripVertical, Trash2 } from "lucide-react";
+import { Edit, GripVertical, Trash2 } from "lucide-react";
 
 const columns: Column[] = [
   { status: "To Do", tasks: [] },
@@ -37,6 +37,7 @@ function DroppableColumn({
 
 // Draggable task component
 function DraggableTask({ task, index }: { task: Task; index: number }) {
+  const [taskIdData, setTaskIdData] = useState<Task | null>(null);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
     data: {
@@ -49,6 +50,15 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       }
     : undefined;
+
+  async function editHandler(taskId: string) {
+    const response = await fetch(`http://localhost:8080/kanban/${taskId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    setTaskIdData(data);
+  }
 
   async function deleteHandler(taskId: string) {
     try {
@@ -85,19 +95,24 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
         <GripVertical className="text-gray-400" />
         <span className="font-semibold text-gray-800">{task.title}</span>
       </div>
-      {/* All other content is NOT draggable */}
-      <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-      <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
-        <p>Priority: {task.priority}</p>
-        <p>Due: {task.due_date}</p>
+
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-sm text-gray-600 mb-2">{task.description}</p>
+          <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
+            <p>Priority: {task.priority}</p>
+            <p>Due: {task.due_date}</p>
+          </div>
+        </div>
+        <div className="flex flex-row gap-2">
+          <button type="button" onClick={() => editHandler(task._id)}>
+            <Edit className="size-4 cursor-pointer hover:text-blue-400" />
+          </button>
+          <button type="button" onClick={() => deleteHandler(task._id)}>
+            <Trash2 className="size-4 cursor-pointer hover:text-red-400" />
+          </button>
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={() => deleteHandler(task._id)}
-        className="ml-2"
-      >
-        <Trash2 className="size-4 cursor-pointer hover:text-red-400" />
-      </button>
     </div>
   );
 }
