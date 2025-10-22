@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useDataFetch from "../hooks/useDataFetch";
 import { Task, Column } from "../types/types";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ export default function KanbanBoard() {
   }, [fetchedData]);
 
   //function for the drag over event
-  function handleDragEvent(event: DragEndEvent) {
+  const handleDragEvent = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) return; // if the hover event is not over i.e. we are not over something droppable
@@ -145,7 +145,31 @@ export default function KanbanBoard() {
         return column;
       });
     });
-  }
+
+    // Update the task status in the backend
+    try {
+      const response = await fetch(
+        `http://localhost:8080/tasks/${taskId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Failed to update task status in backend");
+      } else {
+        console.log(`Task ${taskId} status updated to ${newStatus} in backend`);
+      }
+    } catch (error) {
+      console.error("Error updating task status:", error);
+    }
+  }, []);
 
   return (
     <div className="p-12">
