@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import useDataFetch from "../hooks/useDataFetch";
 import { Task, Column } from "../types/types";
+import { Button } from "@/components/ui/button";
 
 export default function KanbanBoard() {
   const columns: Column[] = [
@@ -33,14 +34,7 @@ export default function KanbanBoard() {
 
   return (
     <div className="p-4">
-      <h1 className="text-4xl font-semibold text-center mb-6">Kanban Board</h1>
-
-      {/* Show data summary */}
-      {fetchedData && (
-        <div className="text-center mb-4 text-gray-600">
-          Total tasks loaded: {fetchedData.length}
-        </div>
-      )}
+      <h1 className="text-2xl font-semibold mb-6">Kanban Workspace</h1>
 
       <div className="flex gap-4 mt-6">
         {columnData.map((item, itemindex) => (
@@ -48,7 +42,7 @@ export default function KanbanBoard() {
             key={itemindex}
             className="w-1/3 bg-blue-400 p-4 rounded-lg shadow-md text-center"
           >
-            <h2 className="font-bold mb-3 bg-red-600 p-2 rounded">
+            <h2 className="font-bold mb-3 p-2 rounded">
               {item.status} ({item.tasks.length})
             </h2>
             <div className="space-y-2">
