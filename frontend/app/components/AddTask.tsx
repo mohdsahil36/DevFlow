@@ -52,6 +52,7 @@ export default function AddTask(props: AddTaskProps) {
   );
 
   async function submitForm(e: React.FormEvent) {
+    console.log("Status recieved:", props.status);
     e.preventDefault();
     const newTask = {
       ...formData,
@@ -85,16 +86,6 @@ export default function AddTask(props: AddTaskProps) {
   return (
     <div className="w-auto">
       <Drawer direction="right" open={props.openModal}>
-        <DrawerTrigger asChild>
-          <Button
-            variant="outline"
-            className="cursor-pointer mt-5 rounded-sm w-1/3"
-            onClickCapture={() => props.setOpenModal(true)}
-          >
-            <PlusCircle />
-            Add Task
-          </Button>
-        </DrawerTrigger>
         <DrawerContent className="min-w-[40rem]">
           <DialogTitle className="hidden">New task</DialogTitle>
           <div className="mt-3 p-7">
@@ -180,11 +171,7 @@ export default function AddTask(props: AddTaskProps) {
                 </div>
               </div>
               <div className="flex justify-end gap-4 mt-8">
-                <Button
-                  className="cursor-pointer text-white"
-                  type="submit"
-                  // form="task-form"
-                >
+                <Button className="cursor-pointer text-white" type="submit">
                   Add Task
                 </Button>
                 <Button
