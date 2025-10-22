@@ -70,7 +70,7 @@ function DraggableTask({ task, index }: { task: Task; index: number }) {
 
 export default function KanbanBoard() {
   const [columnData, setColumnData] = useState<Column[]>(columns);
-  const { data: fetchedData } = useDataFetch();
+  const { data: fetchedData } = useDataFetch("/kanban");
 
   useEffect(() => {
     if (fetchedData && Array.isArray(fetchedData)) {
