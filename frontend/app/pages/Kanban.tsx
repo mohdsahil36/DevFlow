@@ -56,7 +56,7 @@ function DraggableTask({
 }: {
   task: Task;
   setSelectedData: (
-    data: { success?: boolean; data: Task } | undefined
+    data: { success?: boolean; data: Task } | undefined,
   ) => void;
   setOpenModal: (open: boolean) => void;
   setActiveStatus: (status: string) => void;
@@ -148,9 +148,9 @@ export default function KanbanBoard() {
           tasks: tasks.filter(
             (item) =>
               (item.status || "To Do").toLowerCase().trim() ===
-              column.status.toLowerCase().trim()
+              column.status.toLowerCase().trim(),
           ),
-        }))
+        })),
       );
     }
   }, [tasks]);
@@ -171,7 +171,7 @@ export default function KanbanBoard() {
         console.error("Error deleting task!", error);
       }
     },
-    [deleteTasks]
+    [deleteTasks],
   );
 
   //function for the drag over event
@@ -193,7 +193,7 @@ export default function KanbanBoard() {
         // Find the task and its current column
         for (let i = 0; i < prevData.length; i++) {
           const taskIndex = prevData[i].tasks.findIndex(
-            (task) => task._id === taskId
+            (task) => task._id === taskId,
           );
           if (taskIndex !== -1) {
             taskToMove = prevData[i].tasks[taskIndex];
@@ -239,7 +239,7 @@ export default function KanbanBoard() {
         console.error("Error updating task status:", error);
       }
     },
-    [updateTaskStatus]
+    [updateTaskStatus],
   );
 
   // sensor for dnd for mobile screens
@@ -251,11 +251,11 @@ export default function KanbanBoard() {
         tolerance: 5,
       },
     }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor),
   );
 
   return (
-    <div className="px-4 py-8 md:p-12">
+    <div className="px-4 py-8 md:px-2 md:py-2">
       <h1 className="text-2xl font-semibold mb-6">Kanban Workspace</h1>
 
       <DndContext onDragEnd={handleDragEvent} sensors={sensors}>
