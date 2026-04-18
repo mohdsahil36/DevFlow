@@ -255,8 +255,8 @@ export default function KanbanBoard() {
   );
 
   return (
-    <div className="px-4 py-8 md:px-2 md:py-2">
-      <h1 className="text-2xl font-semibold mb-6">Kanban Workspace</h1>
+    <div className="px-2">
+      <h1 className="uppercase text-xl font-semibold">Kanban Workspace</h1>
 
       <DndContext onDragEnd={handleDragEvent} sensors={sensors}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
