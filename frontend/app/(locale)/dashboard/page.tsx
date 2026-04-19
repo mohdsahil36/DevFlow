@@ -28,95 +28,81 @@ export default function DashboardPage() {
     setTaskData([
       {
         status: "To Do",
-        value: tasks.filter((task) => task.status === "To Do").length,
+        value: tasks.filter((t) => t.status === "To Do").length,
       },
       {
         status: "In Progress",
-        value: tasks.filter((task) => task.status === "In Progress").length,
+        value: tasks.filter((t) => t.status === "In Progress").length,
       },
       {
         status: "Done",
-        value: tasks.filter((task) => task.status === "Done").length,
+        value: tasks.filter((t) => t.status === "Done").length,
       },
     ]);
   }, [tasks]);
 
-  const completedTasks = tasks.filter((task) => task.status === "Done").length;
+  const completedTasks = tasks.filter((t) => t.status === "Done").length;
   const completionRate =
     tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
   return (
-    <div className="p-2 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">System Analytics</h1>
-        <p className="text-sm text-muted-foreground">Overview of your vitals</p>
-      </div>
+    <div className="bg-[#e6e3de] min-h-screen">
+      <div className="sm:px-6 py-6 space-y-6">
+        <div
+          className="border-2 border-black bg-white 
+                        shadow-[3px_3px_0px_#1f1f1f] 
+                        p-4 font-mono max-w-6xl mx-auto px-4"
+        >
+          <div className="bg-black text-white text-xs px-2 py-1 inline-block mb-3">
+            SYSTEM
+          </div>
 
-      <div className="bg-white dark:bg-neutral-900 border rounded-2xl shadow-sm p-4 w-1/2">
-        <div className="flex flex-col gap-6">
-          <ChartContainer config={chartConfig} className="w-full max-w-2xl">
-            <BarChart
-              accessibilityLayer
-              data={taskData}
-              layout="vertical"
-              margin={{ top: 8, right: 16, left: 0, bottom: 8 }}
-              barCategoryGap="20%"
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                horizontal={false}
-                className="opacity-30"
-              />
+          <h1 className="text-lg sm:text-xl font-bold">System Analytics</h1>
+          <p className="text-xs sm:text-sm text-gray-600">
+            Overview of your vitals
+          </p>
+        </div>
 
-              <XAxis
-                type="number"
-                allowDecimals={false}
-                tickLine={false}
-                axisLine={false}
-                tickMargin={6}
-                className="text-xs"
-              />
-
-              <YAxis
-                dataKey="status"
-                type="category"
-                tickLine={false}
-                axisLine={false}
-                width={100}
-                className="text-sm font-medium"
-              />
-
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                cursor={{ fill: "hsl(var(--muted) / 0.25)" }}
-              />
-
-              <Bar
-                dataKey="value"
-                fill="#3b82f6"
-                radius={[6, 6, 6, 6]}
-                barSize={22}
-              />
-            </BarChart>
-          </ChartContainer>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">
-                Active Tasks
-              </span>
-              <span className="text-xl font-semibold">{tasks.length}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            className="border-2 border-black bg-white 
+                          shadow-[6px_6px_0px_#1f1f1f] 
+                          p-5 font-mono"
+          >
+            <div className="bg-black text-white text-xs px-2 py-1 inline-block mb-4">
+              TASK ANALYTICS
             </div>
 
-            <div className="flex flex-col items-end">
-              <span className="text-sm text-muted-foreground">
-                Completion Rate
-              </span>
-              <span className="text-xl font-semibold text-blue-600">
-                {completionRate}%
-              </span>
+            <div className="flex flex-col gap-6">
+              <ChartContainer config={chartConfig} className=" max-h-[30rem]">
+                <BarChart data={taskData} layout="vertical">
+                  <CartesianGrid
+                    strokeDasharray="2 2"
+                    horizontal={false}
+                    opacity={0.2}
+                  />
+                  <XAxis type="number" tickLine={false} axisLine={false} />
+                  <YAxis dataKey="status" type="category" width={60} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="value"
+                    fill="oklch(58.8% 0.158 241.966)"
+                    radius={0}
+                  />
+                </BarChart>
+              </ChartContainer>
+
+              <div className="border-t-2 border-black pt-4 grid grid-cols-2 gap-4">
+                <div className="border-2 border-black p-3 bg-[#dbeafe]">
+                  <span className="text-xs">Active Tasks</span>
+                  <div className="text-lg font-bold">{tasks.length}</div>
+                </div>
+
+                <div className="border-2 border-black p-3 bg-[#fef08a]">
+                  <span className="text-xs">Completion</span>
+                  <div className="text-lg font-bold">{completionRate}%</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

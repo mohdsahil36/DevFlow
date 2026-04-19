@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,12 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ChevronDownIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -23,10 +17,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { TaskFormData } from "@/zod/taskTypes";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { useTaskStore } from "../../store/taskStore";
 import type { Task } from "@/app/types/types";
-
 
 type AddTaskProps = {
   status: string;
@@ -44,10 +36,10 @@ const initialFormData = {
 
 export default function AddTask(props: AddTaskProps) {
   const [formData, setFormData] = useState<TaskFormData>(
-    initialFormData as TaskFormData
+    initialFormData as TaskFormData,
   );
   const editTaskData = props.selectedData;
-  
+
   // Destructure from the hook
   const { addOrEditTask } = useTaskStore();
   useEffect(() => {
@@ -69,23 +61,29 @@ export default function AddTask(props: AddTaskProps) {
   }, [editTaskData, props.status]); // undefined
   async function submitForm(e: React.FormEvent) {
     e.preventDefault();
-    
+
     const isEditMode = !!(editTaskData && editTaskData.data);
-    
+
     const taskToSubmit = {
       ...formData,
       status: props.status,
       _id: isEditMode ? formData._id : crypto.randomUUID(),
     };
-  
+
     try {
       const result = await addOrEditTask(taskToSubmit, isEditMode);
       if (!result?.success) {
-        console.error(`Failed to ${isEditMode ? "update" : "add"} task:`, result);
+        console.error(
+          `Failed to ${isEditMode ? "update" : "add"} task:`,
+          result,
+        );
         return;
       }
-      console.log(`Task ${isEditMode ? "updated" : "added"} successfully:`, result);
-      
+      console.log(
+        `Task ${isEditMode ? "updated" : "added"} successfully:`,
+        result,
+      );
+
       setFormData(initialFormData as TaskFormData);
       props.setOpenModal(false);
     } catch (error) {
@@ -101,80 +99,98 @@ export default function AddTask(props: AddTaskProps) {
   };
 
   return (
-    <div className="w-auto">
+    <div className="font-mono">
       <Dialog onOpenChange={handleDialogClose} open={props.openModal}>
-        <DialogContent className="min-w-[40rem]">
-          <DialogTitle className="hidden">New task</DialogTitle>
-          <div className="mt-3 p-7">
+        <DialogContent
+          className="min-w-[42rem] 
+          border-2 border-black 
+          bg-[#f8f6f2] 
+          shadow-[3px_3px_0px_#1f1f1f] 
+          p-0"
+        >
+          <DialogTitle className="sr-only">
+            {props.selectedData ? "Edit Task" : "Add Task"}
+          </DialogTitle>
+          {/* Header */}
+          <div className="bg-[#1f1f1f] text-white px-3 py-2 text-xs">
+            TASK EDITOR
+          </div>
+
+          <div className="p-6">
             <form onSubmit={submitForm}>
-              <div className="flex flex-col gap-y-6">
+              <div className="flex flex-col gap-y-8">
+                {/* Title */}
                 <div>
-                  <Label htmlFor="Task Name">Title</Label>
+                  <Label className="text-xs">Title</Label>
                   <Input
                     placeholder="Enter task title"
-                    className="mt-3"
+                    className="mt-2 border border-black bg-white text-sm 
+                               rounded-none focus-visible:ring-0"
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
                   />
                 </div>
+
+                {/* Description */}
                 <div>
-                  <Label>Description</Label>
+                  <Label className="text-xs">Description</Label>
                   <Textarea
                     placeholder="Enter task details"
-                    className="mt-3 h-12"
+                    className="mt-2 border border-black bg-white text-sm h-20 
+                               rounded-none focus-visible:ring-0"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
                   />
                 </div>
-                <div className="flex justify-between">
-                  <div className="flex flex-col gap-3">
-                    <Label>Priority</Label>
-                    <div>
-                      <Select
-                        value={formData.priority}
-                        onValueChange={(value: "low" | "medium" | "high") =>
-                          setFormData({ ...formData, priority: value })
-                        }
-                      >
-                        <SelectTrigger className="w-48">
-                          <SelectValue placeholder="Priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+
+                {/* Priority + Date */}
+                <div className="flex justify-between gap-6">
+                  {/* Priority */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-xs">Priority</Label>
+
+                    <Select
+                      value={formData.priority}
+                      onValueChange={(value: "low" | "medium" | "high") =>
+                        setFormData({ ...formData, priority: value })
+                      }
+                    >
+                      <SelectTrigger className="w-48 border border-black bg-white text-sm rounded-none">
+                        <SelectValue />
+                      </SelectTrigger>
+
+                      <SelectContent className="border border-black bg-white">
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="flex flex-col gap-3">
-                    <Label htmlFor="date" className="px-1">
-                      Due Date
-                    </Label>
+
+                  {/* Date */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-xs">Due Date</Label>
+
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          id="date"
-                          className="w-48 justify-between font-normal"
+                        <button
+                          className="w-48 border border-black bg-white px-3 py-2 text-left text-sm
+                                     shadow-[2px_2px_0px_#1f1f1f]
+                                     active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                           {formData.dueDate
                             ? formData.dueDate.toDateString()
                             : "Select Date"}
-                          <ChevronDownIcon />
-                        </Button>
+                        </button>
                       </PopoverTrigger>
-                      <PopoverContent
-                        className="w-auto overflow-hidden p-0"
-                        align="start"
-                      >
+
+                      <PopoverContent className="border border-black p-0">
                         <Calendar
                           mode="single"
-                          captionLayout="dropdown"
                           selected={formData.dueDate}
                           onSelect={(date) => {
                             if (date) {
@@ -187,24 +203,42 @@ export default function AddTask(props: AddTaskProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Actions */}
               <div className="flex justify-end gap-4 mt-8">
-                <Button className="cursor-pointer text-white" type="submit">
+                {/* Primary */}
+                <button
+                  type="submit"
+                  className="px-4 py-2 border-2 border-black 
+                             bg-[#dbeafe] 
+                             shadow-[3px_3px_0px_#1f1f1f]
+                             text-xs
+                             active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                >
                   {props.selectedData ? "Update Task" : "Add Task"}
-                </Button>
-                <Button
-                  variant="secondary"
-                  className="cursor-pointer"
+                </button>
+
+                {/* Secondary */}
+                <button
+                  type="button"
                   onClick={() => setFormData(initialFormData as TaskFormData)}
+                  className="px-4 py-2 border-2 border-black 
+                             bg-[#fef08a]
+                             shadow-[2px_2px_0px_#1f1f1f]
+                             text-xs
+                             active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 >
                   Reset
-                </Button>
-                <DialogClose
-                  className="inline-flex cursor-pointer px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                </button>
+
+                {/* Tertiary */}
+                <button
                   type="button"
                   onClick={() => props.setOpenModal(false)}
+                  className="px-4 py-2 border border-black bg-white text-xs"
                 >
                   Cancel
-                </DialogClose>
+                </button>
               </div>
             </form>
           </div>
