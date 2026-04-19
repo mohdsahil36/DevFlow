@@ -15,7 +15,6 @@ import {
   KeyboardSensor,
 } from "@dnd-kit/core";
 import { Edit, GripVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import DeleteConfirmation from "../components/DeleteConfirmation";
 import { useTaskStore } from "@/store/taskStore";
 
@@ -24,20 +23,15 @@ const columns: Column[] = [
   { status: "In Progress", tasks: [] },
   { status: "Done", tasks: [] },
 ];
-// Droppable column component
-function DroppableColumn({
-  children,
-  id,
-  className,
-}: {
+
+type DroppableColumnProps = {
   children: React.ReactNode;
   id: string;
   className?: string;
-}) {
-  const { setNodeRef } = useDroppable({
-    id: id,
-  });
+};
 
+function DroppableColumn({ children, id, className }: DroppableColumnProps) {
+  const { setNodeRef } = useDroppable({ id });
   return (
     <div ref={setNodeRef} className={className}>
       {children}
@@ -45,7 +39,19 @@ function DroppableColumn({
   );
 }
 
-// Draggable task component
+type EditTaskResponse = { success?: boolean; data: Task };
+
+type DraggableTaskProps = {
+  task: Task;
+  setSelectedData: React.Dispatch<
+    React.SetStateAction<EditTaskResponse | undefined>
+  >;
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setActiveStatus: React.Dispatch<React.SetStateAction<string>>;
+  onTaskDelete: (taskId: string) => Promise<void>;
+  editTask: (taskId: string) => Promise<Response>;
+};
+
 function DraggableTask({
   task,
   setSelectedData,
@@ -53,32 +59,19 @@ function DraggableTask({
   setActiveStatus,
   onTaskDelete,
   editTask,
-}: {
-  task: Task;
-  setSelectedData: (
-    data: { success?: boolean; data: Task } | undefined,
-  ) => void;
-  setOpenModal: (open: boolean) => void;
-  setActiveStatus: (status: string) => void;
-  onTaskDelete: (id: string) => void;
-  editTask: (taskId: string) => Promise<Response>;
-}) {
+}: DraggableTaskProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
-    data: {
-      task,
-    },
+    data: { task },
   });
 
   const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
   async function editHandler(taskId: string) {
-    const response = await editTask(taskId);
-    const json = await response.json(); // { success, data }
+    const res = await editTask(taskId);
+    const json = await res.json();
     setSelectedData(json);
     setActiveStatus(json?.data?.status || "To Do");
     setOpenModal(true);
@@ -88,51 +81,54 @@ function DraggableTask({
     <div
       ref={setNodeRef}
       style={style}
-      className="p-3 bg-gray-50 rounded shadow-md text-left"
+      className="p-3 border border-black bg-white 
+                 shadow-[2px_2px_0px_#1f1f1f]"
     >
-      {/* Only this div is draggable */}
+      {/* Priority strip */}
+      <div
+        className={`h-[3px] mb-2 
+          ${task.priority === "low" && "bg-green-400"}
+          ${task.priority === "medium" && "bg-yellow-400"}
+          ${task.priority === "high" && "bg-red-400"}
+        `}
+      />
+
+      {/* Drag handle */}
       <div
         {...listeners}
         {...attributes}
         className="flex items-center gap-2 cursor-grab active:cursor-grabbing mb-2"
         style={{ userSelect: "none", touchAction: "none" }}
       >
-        <GripVertical className="text-gray-400" />
-        <span className="font-semibold text-gray-800">{task.title}</span>
+        <GripVertical className="size-4 text-gray-600" />
+        <span className="text-sm font-semibold">{task.title}</span>
       </div>
 
       <div className="flex justify-between items-start">
-        <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-        <div className="flex flex-row gap-2">
-          <button type="button" onClick={() => editHandler(task._id)}>
-            <Edit className="size-4 cursor-pointer hover:text-blue-400" />
-          </button>
+        <p className="text-xs text-gray-600">{task.description}</p>
 
+        <div className="flex gap-2">
+          <button onClick={() => editHandler(task._id)}>
+            <Edit className="size-4 hover:scale-110 transition" />
+          </button>
           <DeleteConfirmation taskId={task._id} onTaskDelete={onTaskDelete} />
         </div>
       </div>
-      <div className="flex justify-between mt-2 text-xs text-gray-500 mb-3">
-        <p>Priority: {task.priority}</p>
-        <p>
-          Due:{" "}
-          {new Date(task.due_date).toLocaleDateString(undefined, {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })}
-        </p>
+
+      <div className="flex justify-between mt-2 text-xs text-gray-500">
+        <p>{task.priority}</p>
+        <p>{new Date(task.due_date).toLocaleDateString()}</p>
       </div>
     </div>
   );
 }
 
 export default function KanbanBoard() {
-  const [columnData, setColumnData] = useState<Column[]>(columns);
-  const [activeStatus, setActiveStatus] = useState<string>("To Do");
-  const [selectedData, setSelectedData] = useState<
-    { success?: boolean; data: Task } | undefined
-  >(undefined);
+  const [columnData, setColumnData] = useState(columns);
+  const [activeStatus, setActiveStatus] = useState("To Do");
+  const [selectedData, setSelectedData] = useState<EditTaskResponse>();
   const [openModal, setOpenModal] = useState(false);
+
   const { tasks, deleteTasks, fetchTasks, updateTaskStatus, editTask } =
     useTaskStore();
 
@@ -141,14 +137,13 @@ export default function KanbanBoard() {
   }, [fetchTasks]);
 
   useEffect(() => {
-    if (tasks && Array.isArray(tasks)) {
+    if (tasks) {
       setColumnData(
-        columns.map((column) => ({
-          ...column,
+        columns.map((col) => ({
+          ...col,
           tasks: tasks.filter(
-            (item) =>
-              (item.status || "To Do").toLowerCase().trim() ===
-              column.status.toLowerCase().trim(),
+            (t) =>
+              (t.status || "To Do").toLowerCase() === col.status.toLowerCase(),
           ),
         })),
       );
@@ -157,114 +152,92 @@ export default function KanbanBoard() {
 
   const deleteHandler = useCallback(
     async (taskId: string) => {
-      try {
-        const response = await deleteTasks(taskId);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Failed to delete task!", errorData);
-        } else {
-          const result = await response.json();
-          console.log("Task deleted successfully!", result);
-        }
-      } catch (error) {
-        console.error("Error deleting task!", error);
-      }
+      await deleteTasks(taskId);
     },
     [deleteTasks],
   );
 
-  //function for the drag over event
   const handleDragEvent = useCallback(
     async (event: DragEndEvent) => {
       const { active, over } = event;
+      if (!over) return;
 
-      if (!over) return; // if the hover event is not over i.e. we are not over something droppable
+      const taskId = active.id as string;
+      const newStatus = over.id as Task["status"];
 
-      const taskId = active.id as string; // id of the task being dragged
-      const newStatus = over.id as Task["status"]; // status of the task being dragged
-
-      // Find the task and move it to the new column
-      setColumnData((prevData) => {
-        // Find the task in the current data
+      setColumnData((prev) => {
         let taskToMove: Task | null = null;
-        let sourceColumnIndex = -1;
+        let sourceIndex = -1;
 
-        // Find the task and its current column
-        for (let i = 0; i < prevData.length; i++) {
-          const taskIndex = prevData[i].tasks.findIndex(
-            (task) => task._id === taskId,
-          );
-          if (taskIndex !== -1) {
-            taskToMove = prevData[i].tasks[taskIndex];
-            sourceColumnIndex = i;
+        for (let i = 0; i < prev.length; i++) {
+          const idx = prev[i].tasks.findIndex((t) => t._id === taskId);
+          if (idx !== -1) {
+            taskToMove = prev[i].tasks[idx];
+            sourceIndex = i;
             break;
           }
         }
 
-        if (!taskToMove) return prevData;
+        if (!taskToMove || taskToMove.status === newStatus) return prev;
 
-        if (taskToMove.status === newStatus) {
-          return prevData;
-        }
-
-        // Create new task with updated status
         const updatedTask = { ...taskToMove, status: newStatus };
 
-        return prevData.map((column, columnIndex) => {
-          if (columnIndex === sourceColumnIndex) {
-            // Remove task from source column
+        return prev.map((col, i) => {
+          if (i === sourceIndex) {
             return {
-              ...column,
-              tasks: column.tasks.filter((task) => task._id !== taskId),
+              ...col,
+              tasks: col.tasks.filter((t) => t._id !== taskId),
             };
-          } else if (column.status === newStatus) {
-            // Add task to target column
+          } else if (col.status === newStatus) {
             return {
-              ...column,
-              tasks: [...column.tasks, updatedTask],
+              ...col,
+              tasks: [...col.tasks, updatedTask],
             };
           }
-          return column;
+          return col;
         });
       });
 
-      // Update the task status in the backend
-      try {
-        const response = await updateTaskStatus(taskId, newStatus);
-        if (!response.ok) {
-          console.error("Failed to update task status in backend");
-        }
-      } catch (error) {
-        console.error("Error updating task status:", error);
-      }
+      await updateTaskStatus(taskId, newStatus);
     },
     [updateTaskStatus],
   );
 
-  // sensor for dnd for mobile screens
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 2000, //prevent accidental scrolls
-        tolerance: 5,
-      },
-    }),
+    useSensor(TouchSensor),
     useSensor(KeyboardSensor),
   );
 
   return (
-    <div className="px-2">
-      <h1 className="uppercase text-xl font-semibold">Kanban Workspace</h1>
+    <div className="md:px-6 font-mono space-y-6">
+      {/* Header */}
+      <div
+        className="border-2 border-black bg-[#f8f6f2] 
+                      shadow-[3px_3px_0px_#1f1f1f] max-w-6xl mx-auto p-4"
+      >
+        <div className="bg-[#1f1f1f] text-white text-xs px-2 py-1 inline-block mb-2">
+          KANBAN
+        </div>
+        <h1 className="text-lg font-bold">Kanban Workspace</h1>
+      </div>
 
       <DndContext onDragEnd={handleDragEvent} sensors={sensors}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          {columnData.map((item, itemindex) => (
-            <DroppableColumn key={itemindex} id={item.status} className="">
-              <h2 className="font-semibold mb-3 p-2 rounded">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {columnData.map((item, idx) => (
+            <DroppableColumn
+              key={idx}
+              id={item.status}
+              className={`p-4 border border-black 
+                ${item.status === "To Do" && "bg-[#fee2e2]"}
+                ${item.status === "In Progress" && "bg-[#e0f2fe]"}
+                ${item.status === "Done" && "bg-[#dcfce7]"}
+              `}
+            >
+              <h2 className="text-sm font-bold mb-4 border-b border-black pb-2">
                 {item.status} ({item.tasks.length})
               </h2>
+
               <div className="space-y-4">
                 {item.tasks.length > 0 ? (
                   item.tasks.map((task) => (
@@ -279,12 +252,15 @@ export default function KanbanBoard() {
                     />
                   ))
                 ) : (
-                  <p className="text-sm text-gray-200 italic">No tasks</p>
+                  <p className="text-xs text-gray-500 italic">No tasks</p>
                 )}
               </div>
-              <Button
-                variant="outline"
-                className="mt-5 cursor-pointer"
+
+              {/* Add Button */}
+              <button
+                className="mt-5 w-full border border-black bg-white text-xs py-2
+                           shadow-[2px_2px_0px_#1f1f1f]
+                           active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 onClick={() => {
                   setSelectedData(undefined);
                   setActiveStatus(item.status);
@@ -292,11 +268,12 @@ export default function KanbanBoard() {
                 }}
               >
                 + Add Task
-              </Button>
+              </button>
             </DroppableColumn>
           ))}
         </div>
       </DndContext>
+
       <AddTask
         status={activeStatus}
         openModal={openModal}
