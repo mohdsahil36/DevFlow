@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function StopWatch() {
   const [time, setTime] = useState(0);
+
   const stopwatchRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const needToResumeRef = useRef(false);
+
+  function pad(num: number) {
+    return num.toString().padStart(2, "0");
+  }
 
   function formatTime() {
     const ms = Math.floor((time % 1000) / 10);
@@ -16,32 +22,71 @@ export default function StopWatch() {
     return `${pad(hr)}:${pad(min)}:${pad(sec)}.${pad(ms)}`;
   }
 
-  function pad(num: number) {
-    return num.toString().padStart(2, "0");
-  }
-
   function startStopWatch() {
-    stopwatchRef.current = new Date().getTime() - time;
+    // prevent multiple intervals
+    if (intervalRef.current) return;
+
+    stopwatchRef.current = Date.now() - time;
+
     intervalRef.current = setInterval(() => {
-      setTime(new Date().getTime() - stopwatchRef.current);
+      setTime(Date.now() - stopwatchRef.current);
     }, 10);
   }
 
   function pauseStopWatch() {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null; // ✅ critical
+    }
   }
 
   function resetStopWatch() {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setTime(0);
+    needToResumeRef.current = false;
   }
+
+  function onBlur() {
+    // remember if it was running
+    needToResumeRef.current = intervalRef.current !== null;
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }
+
+  function onFocus() {
+    if (needToResumeRef.current) {
+      startStopWatch();
+      needToResumeRef.current = false;
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
+
+      // cleanup interval on unmount
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="max-w-md mx-auto font-mono space-y-6">
       {/* Header */}
       <div
         className="border-2 border-black bg-[#f8f6f2] 
-                      shadow-[3px_3px_0px_#1f1f1f] p-4"
+                   shadow-[3px_3px_0px_#1f1f1f] p-4"
       >
         <div className="bg-[#1f1f1f] text-white text-xs px-2 py-1 inline-block mb-2">
           STOPWATCH
