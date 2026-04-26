@@ -214,7 +214,7 @@ export default function KanbanBoard() {
       {/* Header */}
       <div
         className="border-2 border-black bg-[#f8f6f2] 
-                      shadow-[3px_3px_0px_#1f1f1f] max-w-6xl mx-auto p-4"
+                      shadow-[3px_3px_0px_#1f1f1f] max-w-6xl p-4"
       >
         <div className="bg-[#1f1f1f] text-white text-xs px-2 py-1 inline-block mb-2">
           KANBAN
