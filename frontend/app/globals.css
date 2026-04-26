@@ -120,6 +120,19 @@
   }
   body {
     @apply bg-background text-foreground;
+    background:
+      radial-gradient(
+        1100px circle at 12% -28%,
+        rgba(245, 231, 202, 0.4),
+        transparent 48%
+      ),
+      radial-gradient(
+        860px circle at 100% 0%,
+        rgba(191, 206, 255, 0.16),
+        transparent 44%
+      ),
+      linear-gradient(180deg, #fdfcf8 0%, #f8f5ee 100%);
+    color: #231f1a;
   }
 }
 
@@ -134,4 +147,7 @@
 
 .animate-spin-slow {
   animation: spin-slow 4s linear infinite;
+}
+button {
+  -webkit-tap-highlight-color: transparent;
 }

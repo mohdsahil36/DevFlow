@@ -82,13 +82,13 @@ export default function StopWatch() {
   }, []);
 
   return (
-    <div className="max-w-md mx-auto font-mono space-y-6">
+    <div className="mx-auto max-w-md space-y-6 font-mono text-[#231f1a]">
       {/* Header */}
       <div
-        className="border-2 border-black bg-[#f8f6f2] 
-                   shadow-[3px_3px_0px_#1f1f1f] p-4"
+        className="border-2 border-[#231f1a] bg-[#fffdf5]
+                   p-5 shadow-[6px_6px_0px_#231f1a]"
       >
-        <h1 className="text-xl text-center font-bold tracking-wide">
+        <h1 className="text-center text-xl font-bold tracking-wide">
           {formatTime()}
         </h1>
       </div>
@@ -97,8 +97,8 @@ export default function StopWatch() {
       <div className="flex justify-center gap-4">
         <button
           onClick={startStopWatch}
-          className="px-4 py-2 border-2 border-black bg-[#dbeafe] text-xs
-                     shadow-[3px_3px_0px_#1f1f1f]
+          className="border-2 border-[#231f1a] bg-[#d7e6ff] px-4 py-2 text-xs font-bold tracking-wide
+                     shadow-[4px_4px_0px_#231f1a]
                      active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           Start
@@ -106,16 +106,18 @@ export default function StopWatch() {
 
         <button
           onClick={pauseStopWatch}
-          className="px-4 py-2 border-2 border-black bg-[#fef08a] text-xs
-                     shadow-[2px_2px_0px_#1f1f1f]
-                     active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          className="border-2 border-[#231f1a] bg-[#ffe08a] px-4 py-2 text-xs font-bold tracking-wide
+                     shadow-[4px_4px_0px_#231f1a]
+                     active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           Pause
         </button>
 
         <button
           onClick={resetStopWatch}
-          className="px-4 py-2 border border-black bg-white text-xs"
+          className="border-2 border-[#231f1a] bg-[#ffd6d6] px-4 py-2 text-xs font-bold tracking-wide
+                     shadow-[4px_4px_0px_#231f1a]
+                     active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           Reset
         </button>

@@ -42,15 +42,16 @@ export default function RootLayout({
           ${ibmPlexMono.className} 
           ${geist.variable} 
           ${geistMono.variable} 
-          antialiased 
-          bg-[#e6e3de]
+          antialiased
         `}
       >
         <main className="w-full min-h-screen">
           <Navbar />
 
-          <div className="bg-[#ece9e4] border-t-2 border-black">
-            <div className="py-6">{children}</div>
+          <div className="border-t-2 border-[#231f1a]/70 bg-transparent">
+            <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+              {children}
+            </div>
           </div>
         </main>
       </body>
