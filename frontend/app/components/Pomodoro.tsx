@@ -116,7 +116,7 @@ export default function Pomodoro() {
   const strokeDashoffset = (1 - remainingRatio) * circumference;
 
   return (
-    <div className="flex min-h-[calc(100vh-150px)] items-center justify-center px-4 font-mono text-[#231f1a]">
+    <div className="flex min-h-[20rem] items-center justify-center px-4 font-mono text-[#231f1a]">
       <div className="w-full max-w-md space-y-6">
         <div className="space-y-6 border-2 border-[#231f1a] bg-[#fffdf5] p-6 text-center shadow-[6px_6px_0px_#231f1a]">
           {/* Header */}
