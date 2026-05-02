@@ -136,6 +136,27 @@
   }
 }
 
+.app-theme {
+  /* Backgrounds */
+  --bg-main: #f9fafb;
+  --bg-surface: #ffffff;
+
+  /* Borders */
+  --border-default: #e5e7eb;
+
+  /* Text */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+
+  /* Primary Green */
+  --green-primary: #138a3f;
+  --green-hover: #15803d;
+  --green-active: #166534;
+
+  /* Soft */
+  --green-soft: #dcfce7;
+}
+
 @keyframes spin-slow {
   from {
     transform: rotate(0deg);

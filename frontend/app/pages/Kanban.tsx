@@ -81,41 +81,43 @@ function DraggableTask({
     <div
       ref={setNodeRef}
       style={style}
-      className="p-3 border border-black bg-white 
-                 shadow-[2px_2px_0px_#1f1f1f]"
+      className="p-3 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md shadow-sm"
     >
       {/* Priority strip */}
       <div
-        className={`h-[3px] mb-2 
+        className={`h-[3px] mb-2 rounded
           ${task.priority === "low" && "bg-green-400"}
           ${task.priority === "medium" && "bg-yellow-400"}
           ${task.priority === "high" && "bg-red-400"}
         `}
       />
 
-      {/* Drag handle */}
+      {/* Drag */}
       <div
         {...listeners}
         {...attributes}
-        className="flex items-center gap-2 cursor-grab active:cursor-grabbing mb-2"
-        style={{ userSelect: "none", touchAction: "none" }}
+        className="flex items-center gap-2 cursor-grab mb-2"
       >
-        <GripVertical className="size-4 text-gray-600" />
-        <span className="text-sm font-semibold">{task.title}</span>
+        <GripVertical className="size-4 text-gray-400" />
+        <span className="text-sm font-medium text-[var(--text-primary)]">
+          {task.title}
+        </span>
       </div>
 
       <div className="flex justify-between items-start">
-        <p className="text-xs text-gray-600">{task.description}</p>
+        <p className="text-xs text-[var(--text-secondary)]">
+          {task.description}
+        </p>
 
         <div className="flex gap-2">
           <button onClick={() => editHandler(task._id)}>
-            <Edit className="size-4 hover:scale-110 transition" />
+            <Edit className="size-4 text-gray-500 hover:text-black transition" />
           </button>
           <DeleteConfirmation taskId={task._id} onTaskDelete={onTaskDelete} />
         </div>
       </div>
 
-      <div className="flex justify-between mt-2 text-xs text-gray-500">
+      <div className="flex justify-between mt-2 text-[10px] text-gray-400">
         <p>{task.priority}</p>
         <p>{new Date(task.due_date).toLocaleDateString()}</p>
       </div>
@@ -210,35 +212,25 @@ export default function KanbanBoard() {
   );
 
   return (
-    <div className="md:px-6 font-mono space-y-6">
+    <div className="px-4 py-6 bg-[var(--bg-main)] space-y-5">
       {/* Header */}
-      <div
-        className="border-2 border-black bg-[#f8f6f2] 
-                      shadow-[3px_3px_0px_#1f1f1f] max-w-6xl p-4"
-      >
-        <div className="bg-[#1f1f1f] text-white text-xs px-2 py-1 inline-block mb-2">
-          KANBAN
-        </div>
-        <h1 className="text-lg font-bold">Kanban Workspace</h1>
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm">
+        <h1 className="text-base font-semibold">Kanban Workspace</h1>
       </div>
 
       <DndContext onDragEnd={handleDragEvent} sensors={sensors}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {columnData.map((item, idx) => (
             <DroppableColumn
               key={idx}
               id={item.status}
-              className={`p-4 border border-black 
-                ${item.status === "To Do" && "bg-[#fee2e2]"}
-                ${item.status === "In Progress" && "bg-[#e0f2fe]"}
-                ${item.status === "Done" && "bg-[#dcfce7]"}
-              `}
+              className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm"
             >
-              <h2 className="text-sm font-bold mb-4 border-b border-black pb-2">
+              <h2 className="text-xs font-medium text-[var(--text-secondary)] mb-3">
                 {item.status} ({item.tasks.length})
               </h2>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {item.tasks.length > 0 ? (
                   item.tasks.map((task) => (
                     <DraggableTask
@@ -252,15 +244,18 @@ export default function KanbanBoard() {
                     />
                   ))
                 ) : (
-                  <p className="text-xs text-gray-500 italic">No tasks</p>
+                  <p className="text-xs text-gray-400">No tasks</p>
                 )}
               </div>
 
-              {/* Add Button */}
               <button
-                className="mt-5 w-full border border-black bg-white text-xs py-2
-                           shadow-[2px_2px_0px_#1f1f1f]
-                           active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                className="
+                  mt-4 w-full text-xs font-medium
+                  bg-[var(--green-primary)] text-white py-2 rounded-md
+                  hover:bg-[var(--green-hover)]
+                  active:bg-[var(--green-active)]
+                  transition
+                "
                 onClick={() => {
                   setSelectedData(undefined);
                   setActiveStatus(item.status);
