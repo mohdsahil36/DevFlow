@@ -79,45 +79,57 @@ export default function StopWatch() {
         clearInterval(intervalRef.current);
       }
     };
-  }, []);
+  });
 
   return (
-    <div className="mx-auto max-w-md space-y-6 font-mono text-[#231f1a]">
-      {/* Header */}
-      <div
-        className="border-2 border-[#231f1a] bg-[#fffdf5]
-                   p-5 shadow-[6px_6px_0px_#231f1a]"
-      >
-        <h1 className="text-center text-xl font-bold tracking-wide">
+    <div className="mx-auto max-w-md space-y-5 text-[var(--text-primary)]">
+      {/* Timer Display */}
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm">
+        <h1 className="text-center text-lg font-semibold tracking-tight">
           {formatTime()}
         </h1>
       </div>
 
       {/* Controls */}
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-3">
+        {/* Start */}
         <button
           onClick={startStopWatch}
-          className="border-2 border-[#231f1a] bg-[#d7e6ff] px-4 py-2 text-xs font-bold tracking-wide
-                     shadow-[4px_4px_0px_#231f1a]
-                     active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="
+            px-4 py-2 text-xs font-medium rounded-md
+            bg-[var(--green-primary)] text-white
+            hover:bg-[var(--green-hover)]
+            active:bg-[var(--green-active)]
+            transition
+          "
         >
           Start
         </button>
 
+        {/* Pause */}
         <button
           onClick={pauseStopWatch}
-          className="border-2 border-[#231f1a] bg-[#ffe08a] px-4 py-2 text-xs font-bold tracking-wide
-                     shadow-[4px_4px_0px_#231f1a]
-                     active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="
+            px-4 py-2 text-xs font-medium rounded-md
+            bg-gray-100 text-[var(--text-primary)]
+            hover:bg-gray-200
+            active:bg-gray-300
+            transition
+          "
         >
           Pause
         </button>
 
+        {/* Reset */}
         <button
           onClick={resetStopWatch}
-          className="border-2 border-[#231f1a] bg-[#ffd6d6] px-4 py-2 text-xs font-bold tracking-wide
-                     shadow-[4px_4px_0px_#231f1a]
-                     active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="
+            px-4 py-2 text-xs font-medium rounded-md
+            bg-gray-100 text-[var(--text-primary)]
+            hover:bg-gray-200
+            active:bg-gray-300
+            transition
+          "
         >
           Reset
         </button>

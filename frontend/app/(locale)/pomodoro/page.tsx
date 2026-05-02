@@ -6,24 +6,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PomodoroPage() {
   return (
-    <div className="min-h-[30rem] bg-[#f8f8f6] p-4 font-mono">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <div className="min-h-[30rem] bg-[var(--bg-main)] px-4 py-6">
+      <div className="max-w-2xl mx-auto space-y-5">
         {/* Tabs */}
-        <Tabs defaultValue="pomodoro" className="w-full text-center">
+        <Tabs defaultValue="pomodoro" className="w-full">
           {/* Tabs Header */}
-          <TabsList className="flex gap-2 bg-transparent p-0">
+          <TabsList className="flex gap-2 bg-transparent p-0 justify-center">
             {["pomodoro", "stopwatch"].map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
                 className="
-                  px-4 py-2 border-2 border-black text-xs uppercase
-                  bg-white
-                  shadow-[3px_3px_0px_#000]
-                  data-[state=active]:translate-x-[2px]
-                  data-[state=active]:translate-y-[2px]
-                  data-[state=active]:shadow-none
-                  transition-all
+                  px-3 py-1.5 text-xs font-medium rounded-md transition
+                  text-[var(--text-secondary)]
+                  hover:text-[var(--text-primary)]
+                  hover:bg-gray-100
+                  data-[state=active]:bg-[var(--green-soft)]
+                  data-[state=active]:text-[var(--green-active)]
                 "
               >
                 {tab}
@@ -33,16 +32,12 @@ export default function PomodoroPage() {
 
           {/* Pomodoro */}
           <TabsContent value="pomodoro">
-            <div
-              className="
-                border-2 border-black bg-white p-6 mt-4
-                shadow-[4px_4px_0px_#000]
-                space-y-4
-              "
-            >
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm mt-4 space-y-4">
               <div>
-                <h2 className="text-sm uppercase tracking-wide">Pomodoro</h2>
-                <p className="text-xs text-gray-600">
+                <h2 className="text-sm font-medium text-[var(--text-primary)]">
+                  Pomodoro
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)]">
                   Focus timer for deep work sessions
                 </p>
               </div>
@@ -53,16 +48,12 @@ export default function PomodoroPage() {
 
           {/* Stopwatch */}
           <TabsContent value="stopwatch">
-            <div
-              className="
-                border-2 border-black bg-white p-6 mt-4
-                shadow-[4px_4px_0px_#000]
-                space-y-4
-              "
-            >
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm mt-4 space-y-4">
               <div>
-                <h2 className="text-sm uppercase tracking-wide">Stopwatch</h2>
-                <p className="text-xs text-gray-600">
+                <h2 className="text-sm font-medium text-[var(--text-primary)]">
+                  Stopwatch
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)]">
                   Track time manually with precision
                 </p>
               </div>

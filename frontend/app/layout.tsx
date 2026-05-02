@@ -45,7 +45,7 @@ export default function RootLayout({
           antialiased
         `}
       >
-        <main className="w-full min-h-screen">
+        <main className="w-full min-h-screen app-theme">
           <Navbar />
 
           <div className="border-t-2 border-[#231f1a]/70 bg-transparent">

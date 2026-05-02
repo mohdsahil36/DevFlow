@@ -36,6 +36,7 @@ export default function Pomodoro() {
   function convertedTime() {
     let convertedTime = 0;
     orderOfTime.forEach((key) => {
+      // order of time because we have to traverse through the array
       const { value, factor } = config[key];
       if (!isNaN(Number(value))) {
         convertedTime += Number(value) * factor;
@@ -72,12 +73,13 @@ export default function Pomodoro() {
   const strokeDashoffset = (1 - progress) * circumference;
 
   return (
-    <div className="flex min-h-[20rem] items-center justify-center px-4 font-mono text-[#231f1a]">
-      <div className="w-full max-w-md space-y-6">
-        <div className="space-y-6 border-2 border-[#231f1a] bg-[#fffdf5] p-6 text-center shadow-[6px_6px_0px_#231f1a]">
+    <div className="flex min-h-[20rem] items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-5">
+        {/* Card */}
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-5 text-center shadow-sm space-y-5">
           {/* Header */}
-          <div className="text-xs font-bold tracking-[0.35em] text-[#5b5245]">
-            POMODORO
+          <div className="text-xs font-medium text-[var(--text-secondary)] tracking-wide">
+            Pomodoro
           </div>
 
           {/* Inputs */}
@@ -89,13 +91,23 @@ export default function Pomodoro() {
                     type="number"
                     value={config[key].value}
                     onChange={(e) => handleChange(key, e)}
-                    className="w-14 border-2 border-[#231f1a] bg-[#fff8dc] py-1 text-center text-sm outline-none focus:bg-[#fff3bf]"
+                    className="
+                      w-12 text-center text-sm
+                      border border-[var(--border-default)]
+                      rounded-md
+                      bg-[var(--bg-surface)]
+                      focus:outline-none focus:ring-2 focus:ring-[var(--green-primary)]
+                    "
                   />
-                  <span className="text-[10px] text-[#7a6f61]">{key}</span>
+                  <span className="text-[10px] text-[var(--text-secondary)]">
+                    {key}
+                  </span>
                 </div>
 
                 {index < orderOfTime.length - 1 && (
-                  <span className="text-sm text-[#7a6f61]">:</span>
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    :
+                  </span>
                 )}
               </div>
             ))}
@@ -104,23 +116,25 @@ export default function Pomodoro() {
           {/* Timer */}
           <div className="relative flex items-center justify-center">
             <svg
-              className="absolute w-44 h-44 -rotate-90"
+              className="absolute w-40 h-40 -rotate-90"
               viewBox="0 0 100 100"
             >
+              {/* Background */}
               <circle
                 cx="50"
                 cy="50"
                 r="45"
-                stroke="#d8cfbd"
+                stroke="var(--border-default)"
                 strokeWidth="5"
                 fill="none"
               />
 
+              {/* Progress */}
               <circle
                 cx="50"
                 cy="50"
                 r="45"
-                stroke="#5D3FD3"
+                stroke="var(--green-primary)"
                 strokeWidth="5"
                 fill="none"
                 strokeDasharray={circumference}
@@ -130,32 +144,29 @@ export default function Pomodoro() {
               />
             </svg>
 
-            <div className="flex h-44 w-44 items-center justify-center rounded-full border-2 border-[#231f1a] bg-[#fff9ea] shadow-[inset_0_0_0_3px_#efe3cc]">
-              <span className="text-2xl font-bold text-[#231f1a]">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-[var(--bg-surface)]">
+              <span className="text-xl font-semibold text-[var(--text-primary)]">
                 {formatTime(time || previewTime)}
               </span>
             </div>
           </div>
 
           {/* Status */}
-          <p className="text-sm text-[#7a6f61]">
-            {!time ? "Ready to focus" : "Focus mode ON"}
+          <p className="text-xs text-[var(--text-secondary)]">
+            {!time ? "Ready" : "Running"}
           </p>
 
           {/* Buttons */}
           <div className="flex justify-center gap-3">
             {/* Start */}
             <button
-              onClick={() => {
-                start(convertedTime(), "pomodoro");
-              }}
+              onClick={() => start(convertedTime(), "pomodoro")}
               className="
-                border-2 border-[#231f1a] bg-[#fff3bf] px-4 py-2 text-xs font-bold tracking-wide text-[#231f1a]
-                shadow-[4px_4px_0px_#231f1a]
-                cursor-pointer select-none
-                active:translate-x-[2px] active:translate-y-[2px]
-                active:shadow-none
-                transition-all duration-75
+                px-4 py-2 text-xs font-medium rounded-md
+                bg-[var(--green-primary)] text-white
+                hover:bg-[var(--green-hover)]
+                active:bg-[var(--green-active)]
+                transition
               "
             >
               Start
@@ -165,12 +176,11 @@ export default function Pomodoro() {
             <button
               onClick={pause}
               className="
-                border-2 border-[#231f1a] bg-[#fff3bf] px-4 py-2 text-xs font-bold tracking-wide text-[#231f1a]
-                shadow-[4px_4px_0px_#231f1a]
-                cursor-pointer select-none
-                active:translate-x-[2px] active:translate-y-[2px]
-                active:shadow-none
-                transition-all duration-75
+                px-4 py-2 text-xs font-medium rounded-md
+                bg-gray-100 text-[var(--text-primary)]
+                hover:bg-gray-200
+                active:bg-gray-300
+                transition
               "
             >
               Pause
@@ -180,12 +190,11 @@ export default function Pomodoro() {
             <button
               onClick={reset}
               className="
-                border-2 border-[#231f1a] bg-[#fff3bf] px-4 py-2 text-xs font-bold tracking-wide text-[#231f1a]
-                shadow-[4px_4px_0px_#231f1a]
-                cursor-pointer select-none
-                active:translate-x-[2px] active:translate-y-[2px]
-                active:shadow-none
-                transition-all duration-75
+                px-4 py-2 text-xs font-medium rounded-md
+                bg-gray-100 text-[var(--text-primary)]
+                hover:bg-gray-200
+                active:bg-gray-300
+                transition
               "
             >
               Reset
