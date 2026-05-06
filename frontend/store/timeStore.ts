@@ -75,5 +75,13 @@ export const useTimeStore = create<TimeStore>((set, get) => ({
 
   pause: () => {},
 
-  reset: () => {},
+  reset: () => {
+    set({
+      time: 0,
+      type: null,
+      isRunning: false,
+      intervalRef: null,
+      remainingTime: 0,
+    });
+  },
 }));
