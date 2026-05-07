@@ -114,40 +114,47 @@ export default function Pomodoro() {
           </div>
 
           {/* Timer */}
-          <div className="relative flex items-center justify-center">
-            <svg
-              className="absolute w-40 h-40 -rotate-90"
-              viewBox="0 0 100 100"
-            >
-              {/* Background */}
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                stroke="var(--border-default)"
-                strokeWidth="5"
-                fill="none"
-              />
+          {/* Timer */}
+          <div className="flex justify-center py-2">
+            <div className="relative flex h-44 w-44 items-center justify-center">
+              {/* Progress Ring */}
+              <svg
+                className="absolute inset-0 h-44 w-44 -rotate-90"
+                viewBox="0 0 100 100"
+              >
+                {/* Background Ring */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  stroke="var(--border-default)"
+                  strokeWidth="4"
+                  fill="none"
+                />
 
-              {/* Progress */}
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                stroke="var(--green-primary)"
-                strokeWidth="5"
-                fill="none"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                className="transition-[stroke-dashoffset] duration-150"
-              />
-            </svg>
+                {/* Progress Ring */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  stroke="var(--green-primary)"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  className="transition-all duration-300"
+                />
+              </svg>
 
-            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-[var(--bg-surface)]">
-              <span className="text-xl font-semibold text-[var(--text-primary)]">
-                {formatTime(time || previewTime)}
-              </span>
+              {/* Center */}
+              <div className="flex h-36 w-36 items-center justify-center rounded-full bg-[var(--bg-main)] border border-[var(--border-default)]">
+                <span className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+                  {isRunning || time > 0
+                    ? formatTime(time)
+                    : formatTime(previewTime)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -166,7 +173,7 @@ export default function Pomodoro() {
                 bg-[var(--green-primary)] text-white
                 hover:bg-[var(--green-hover)]
                 active:bg-[var(--green-active)]
-                transition
+                transition cursor-pointer
               "
             >
               Start
@@ -180,7 +187,7 @@ export default function Pomodoro() {
                 bg-gray-100 text-[var(--text-primary)]
                 hover:bg-gray-200
                 active:bg-gray-300
-                transition
+                transition cursor-pointer
               "
             >
               Pause
@@ -188,13 +195,16 @@ export default function Pomodoro() {
 
             {/* Reset */}
             <button
-              onClick={reset}
+              onClick={() => {
+                reset(); // call the reset function and reset the timer
+                setConfig(structuredClone(timeConfig)); // reset the displayed time
+              }}
               className="
                 px-4 py-2 text-xs font-medium rounded-md
                 bg-gray-100 text-[var(--text-primary)]
                 hover:bg-gray-200
                 active:bg-gray-300
-                transition
+                transition cursor-pointer
               "
             >
               Reset
