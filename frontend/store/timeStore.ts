@@ -47,6 +47,7 @@ export const useTimeStore = create<TimeStore>((set, get) => ({
       isRunning: true,
       type,
       remainingTime: 0,
+      time: total,
     });
 
     // start interval
@@ -73,7 +74,33 @@ export const useTimeStore = create<TimeStore>((set, get) => ({
     set({ intervalRef: interval });
   },
 
-  pause: () => {},
+  pause: () => {
+    const interval = get().intervalRef;
+    if (interval) clearInterval(interval);
 
-  reset: () => {},
+    const remainingTime = get().endTime - Date.now();
+    set({
+      remainingTime: remainingTime,
+      isRunning: false,
+      intervalRef: null,
+      time: remainingTime,
+    });
+  },
+
+  reset: () => {
+    const interval = get().intervalRef;
+
+    if (interval) {
+      clearInterval(interval);
+    }
+
+    set({
+      time: 0,
+      type: null,
+      isRunning: false,
+      intervalRef: null,
+      remainingTime: 0,
+      endTime: 0,
+    });
+  },
 }));
