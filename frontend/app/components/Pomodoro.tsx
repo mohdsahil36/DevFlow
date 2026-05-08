@@ -24,7 +24,7 @@ const orderOfTime = [
 export default function Pomodoro() {
   const [config, setConfig] = useState(structuredClone(timeConfig));
 
-  const { time, start, pause, reset } = useTimeStore();
+  const { time, startPomodoro, pause, reset } = useTimeStore();
 
   function handleChange(key: string, e: ChangeEvent<HTMLInputElement>) {
     const newValue = Number(e.target.value).toString();
@@ -167,7 +167,7 @@ export default function Pomodoro() {
           <div className="flex justify-center gap-3">
             {/* Start */}
             <button
-              onClick={() => start(convertedTime(), "pomodoro")}
+              onClick={() => startPomodoro(convertedTime())}
               className="
                 px-4 py-2 text-xs font-medium rounded-md
                 bg-[var(--green-primary)] text-white
