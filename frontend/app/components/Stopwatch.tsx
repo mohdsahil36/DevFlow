@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { useTimeStore } from "@/store/timeStore";
 
 export default function StopWatch() {
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const needToResumeRef = useRef(false);
   const { time, startStopwatch, pause, reset } = useTimeStore();
 
   function pad(num: number) {
@@ -21,37 +18,37 @@ export default function StopWatch() {
     return `${pad(hr)}:${pad(min)}:${pad(sec)}.${pad(ms)}`;
   }
 
-  function onBlur() {
-    // remember if it was running
-    needToResumeRef.current = intervalRef.current !== null;
+  // function onBlur() {
+  //   // remember if it was running
+  //   needToResumeRef.current = intervalRef.current !== null;
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }
+  //   if (intervalRef.current) {
+  //     clearInterval(intervalRef.current);
+  //     intervalRef.current = null;
+  //   }
+  // }
 
-  function onFocus() {
-    if (needToResumeRef.current) {
-      startStopwatch();
-      needToResumeRef.current = false;
-    }
-  }
+  // function onFocus() {
+  //   if (needToResumeRef.current) {
+  //     startStopwatch();
+  //     needToResumeRef.current = false;
+  //   }
+  // }
 
-  useEffect(() => {
-    window.addEventListener("blur", onBlur);
-    window.addEventListener("focus", onFocus);
+  // useEffect(() => {
+  //   window.addEventListener("blur", onBlur);
+  //   window.addEventListener("focus", onFocus);
 
-    return () => {
-      window.removeEventListener("blur", onBlur);
-      window.removeEventListener("focus", onFocus);
+  //   return () => {
+  //     window.removeEventListener("blur", onBlur);
+  //     window.removeEventListener("focus", onFocus);
 
-      // cleanup interval on unmount
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  });
+  //     // cleanup interval on unmount
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //     }
+  //   };
+  // });
 
   return (
     <div className="mx-auto max-w-md space-y-5 text-[var(--text-primary)]">

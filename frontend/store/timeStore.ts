@@ -99,10 +99,18 @@ export const useTimeStore = create<TimeStore>((set, get) => ({
   },
 
   startStopwatch: () => {
+    if (get().type !== "stopwatch") {
+      set({
+        time: 0,
+        type: "stopwatch",
+        startTime: 0,
+        isRunning: true,
+      });
+    }
     const currentInterval = get().intervalRef;
 
     // prevent multiple intervals
-    if (currentInterval) return;
+    if (currentInterval) clearInterval(currentInterval);
 
     // resume support
     const startTime = Date.now() - get().time;
@@ -114,7 +122,7 @@ export const useTimeStore = create<TimeStore>((set, get) => ({
     });
 
     const interval = setInterval(() => {
-      const elapsed = Date.now() - get().startTime;
+      const elapsed = Date.now() - startTime;
 
       set({
         time: elapsed,
