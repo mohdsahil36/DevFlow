@@ -21,11 +21,28 @@ const orderOfTime = [
   timeFactors.Seconds,
 ];
 
+/* ── RING GEOMETRY — matches FocusCell exactly ───────────── */
+const RADIUS = 45;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ≈ 282.74
+
+/* ── HELPERS ─────────────────────────────────────────────── */
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
+}
+
+function formatTime(ms: number) {
+  const s = Math.floor((ms / 1000) % 60);
+  const m = Math.floor((ms / (1000 * 60)) % 60);
+  const hr = Math.floor((ms / (1000 * 60 * 60)) % 24);
+  return `${pad(hr)}:${pad(m)}:${pad(s)}`;
+}
+
 export default function Pomodoro() {
   const [config, setConfig] = useState(structuredClone(timeConfig));
 
   const { time, startPomodoro, pause, reset } = useTimeStore();
 
+  /* Input handler */
   function handleChange(key: string, e: ChangeEvent<HTMLInputElement>) {
     const newValue = Number(e.target.value).toString();
     const newConfig = structuredClone(config);
@@ -63,49 +80,72 @@ export default function Pomodoro() {
     return acc + (Number(value) || 0) * factor;
   }, 0);
 
-  // circular progress
-  const totalTime = previewTime || time || 1;
   const isRunning = time > 0;
-
+  const totalTime = previewTime || time || 1;
   const progress = isRunning ? time / totalTime : 1;
+  const strokeDashoffset = (1 - progress) * CIRCUMFERENCE;
 
-  const circumference = 2 * Math.PI * 45;
-  const strokeDashoffset = (1 - progress) * circumference;
+  const displayTime = isRunning ? formatTime(time) : formatTime(previewTime);
 
   return (
     <div className="flex min-h-[20rem] items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-5">
-        {/* Card */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-5 text-center shadow-sm space-y-5">
+      <div className="w-full max-w-md">
+        <div className="bg-[var(--db-bg-surface)] border border-[var(--db-border-default)] rounded-2xl p-6 shadow-sm space-y-5">
           {/* Header */}
-          <div className="text-xs font-medium text-[var(--text-secondary)] tracking-wide">
-            Pomodoro
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[13px] font-semibold tracking-[-0.01em] text-[var(--db-text-primary)]">
+                Pomodoro
+              </h2>
+              <p className="text-[11px] text-[var(--db-text-tertiary)] mt-0.5">
+                Focus timer
+              </p>
+            </div>
+
+            <span
+              className={[
+                "text-[9px] font-medium tracking-[0.07em] uppercase px-2.5 py-1 rounded-full border transition-colors duration-200",
+                isRunning
+                  ? "bg-[var(--db-green-soft)] text-[var(--db-green-active)] border-[var(--db-green-mid)]"
+                  : "bg-[var(--db-bg-surface-2)] text-[var(--db-text-tertiary)] border-[var(--db-border-default)]",
+              ].join(" ")}
+            >
+              {isRunning ? "Running" : "Ready"}
+            </span>
           </div>
 
-          {/* Inputs */}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-end justify-center gap-2">
             {orderOfTime.map((key, index) => (
-              <div key={key} className="flex items-center gap-2">
-                <div className="flex flex-col items-center">
+              <div key={key} className="flex items-end gap-2">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[9px] font-medium tracking-[0.07em] uppercase text-[var(--db-text-tertiary)]">
+                    {key === "h"
+                      ? "Hours"
+                      : key === "m"
+                        ? "Minutes"
+                        : "Seconds"}
+                  </span>
                   <input
                     type="number"
+                    min="0"
                     value={config[key].value}
                     onChange={(e) => handleChange(key, e)}
+                    disabled={isRunning}
                     className="
-                      w-12 text-center text-sm
-                      border border-[var(--border-default)]
-                      rounded-md
-                      bg-[var(--bg-surface)]
-                      focus:outline-none focus:ring-2 focus:ring-[var(--green-primary)]
+                      w-14 text-center text-sm font-medium font-mono
+                      bg-[var(--db-bg-surface-2)]
+                      border border-[var(--db-border-default)]
+                      rounded-xl px-2 py-1.5
+                      text-[var(--db-text-primary)]
+                      focus:outline-none focus:border-[var(--db-green-primary)] focus:ring-1 focus:ring-[var(--db-green-primary)]
+                      disabled:opacity-40 disabled:cursor-not-allowed
+                      transition-colors duration-150
+                      [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
                     "
                   />
-                  <span className="text-[10px] text-[var(--text-secondary)]">
-                    {key}
-                  </span>
                 </div>
-
                 {index < orderOfTime.length - 1 && (
-                  <span className="text-sm text-[var(--text-secondary)]">
+                  <span className="mb-2 text-base font-semibold text-[var(--db-text-tertiary)]">
                     :
                   </span>
                 )}
@@ -113,98 +153,89 @@ export default function Pomodoro() {
             ))}
           </div>
 
-          {/* Timer */}
-          {/* Timer */}
           <div className="flex justify-center py-2">
             <div className="relative flex h-44 w-44 items-center justify-center">
-              {/* Progress Ring */}
               <svg
                 className="absolute inset-0 h-44 w-44 -rotate-90"
                 viewBox="0 0 100 100"
+                aria-label={`Timer: ${displayTime}`}
               >
-                {/* Background Ring */}
+                {/* Background track */}
                 <circle
                   cx="50"
                   cy="50"
-                  r="45"
-                  stroke="var(--border-default)"
+                  r={RADIUS}
+                  stroke="var(--db-border-default)"
                   strokeWidth="4"
                   fill="none"
                 />
-
-                {/* Progress Ring */}
+                {/* Progress arc */}
                 <circle
                   cx="50"
                   cy="50"
-                  r="45"
-                  stroke="var(--green-primary)"
+                  r={RADIUS}
+                  stroke="var(--db-green-primary)"
                   strokeWidth="4"
                   fill="none"
-                  strokeDasharray={circumference}
+                  strokeDasharray={CIRCUMFERENCE}
                   strokeDashoffset={strokeDashoffset}
                   strokeLinecap="round"
                   className="transition-all duration-300"
                 />
               </svg>
 
-              {/* Center */}
-              <div className="flex h-36 w-36 items-center justify-center rounded-full bg-[var(--bg-main)] border border-[var(--border-default)]">
-                <span className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-                  {isRunning || time > 0
-                    ? formatTime(time)
-                    : formatTime(previewTime)}
+              {/* Centre */}
+              <div className="flex h-36 w-36 flex-col items-center justify-center gap-0.5 rounded-full bg-[var(--db-bg-surface-2)] border border-[var(--db-border-default)]">
+                <span className="font-mono text-2xl font-semibold tracking-tight text-[var(--db-text-primary)]">
+                  {displayTime}
+                </span>
+                <span className="text-[10px] text-[var(--db-text-tertiary)] tracking-wide">
+                  {isRunning ? "Remaining" : "Start"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Status */}
-          <p className="text-xs text-[var(--text-secondary)]">
-            {!time ? "Ready" : "Running"}
-          </p>
-
-          {/* Buttons */}
-          <div className="flex justify-center gap-3">
-            {/* Start */}
+          <div className="flex justify-center gap-2">
             <button
               onClick={() => startPomodoro(convertedTime())}
               className="
-                px-4 py-2 text-xs font-medium rounded-md
-                bg-[var(--green-primary)] text-white
-                hover:bg-[var(--green-hover)]
-                active:bg-[var(--green-active)]
-                transition cursor-pointer
+                px-5 py-2 text-xs font-semibold rounded-xl
+                bg-[var(--db-green-primary)] text-white
+                hover:bg-[var(--db-green-hover)]
+                active:scale-[0.98]
+                transition-all duration-150 cursor-pointer
               "
             >
               Start
             </button>
 
-            {/* Pause */}
             <button
               onClick={pause}
               className="
-                px-4 py-2 text-xs font-medium rounded-md
-                bg-gray-100 text-[var(--text-primary)]
-                hover:bg-gray-200
-                active:bg-gray-300
-                transition cursor-pointer
+                px-5 py-2 text-xs font-semibold rounded-xl
+                bg-[var(--db-bg-surface-2)] text-[var(--db-text-primary)]
+                border border-[var(--db-border-default)]
+                hover:border-[var(--db-border-mid)]
+                active:scale-[0.98]
+                transition-all duration-150 cursor-pointer
               "
             >
               Pause
             </button>
 
-            {/* Reset */}
             <button
               onClick={() => {
-                reset(); // call the reset function and reset the timer
-                setConfig(structuredClone(timeConfig)); // reset the displayed time
+                reset();
+                setConfig(structuredClone(timeConfig));
               }}
               className="
-                px-4 py-2 text-xs font-medium rounded-md
-                bg-gray-100 text-[var(--text-primary)]
-                hover:bg-gray-200
-                active:bg-gray-300
-                transition cursor-pointer
+                px-5 py-2 text-xs font-semibold rounded-xl
+                bg-[var(--db-bg-surface-2)] text-[var(--db-text-primary)]
+                border border-[var(--db-border-default)]
+                hover:border-[var(--db-border-mid)]
+                active:scale-[0.98]
+                transition-all duration-150 cursor-pointer
               "
             >
               Reset
