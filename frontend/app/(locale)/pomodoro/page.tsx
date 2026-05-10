@@ -32,7 +32,10 @@ export default function PomodoroPage() {
 
           {/* Pomodoro */}
           <TabsContent value="pomodoro">
-            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm mt-4 space-y-4">
+            <div
+              className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md p-4 shadow-sm mt-4 space-y-4
+"
+            >
               <div>
                 <h2 className="text-sm font-medium text-[var(--text-primary)]">
                   Pomodoro

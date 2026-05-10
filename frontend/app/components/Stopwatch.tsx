@@ -1,13 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useTimeStore } from "@/store/timeStore";
 
 export default function StopWatch() {
-  const [time, setTime] = useState(0);
-
-  const stopwatchRef = useRef<number>(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const needToResumeRef = useRef(false);
+  const { time, startStopwatch, pause, reset } = useTimeStore();
 
   function pad(num: number) {
     return num.toString().padStart(2, "0");
@@ -22,64 +18,37 @@ export default function StopWatch() {
     return `${pad(hr)}:${pad(min)}:${pad(sec)}.${pad(ms)}`;
   }
 
-  function startStopWatch() {
-    // prevent multiple intervals
-    if (intervalRef.current) return;
+  // function onBlur() {
+  //   // remember if it was running
+  //   needToResumeRef.current = intervalRef.current !== null;
 
-    stopwatchRef.current = Date.now() - time;
+  //   if (intervalRef.current) {
+  //     clearInterval(intervalRef.current);
+  //     intervalRef.current = null;
+  //   }
+  // }
 
-    intervalRef.current = setInterval(() => {
-      setTime(Date.now() - stopwatchRef.current);
-    }, 10);
-  }
+  // function onFocus() {
+  //   if (needToResumeRef.current) {
+  //     startStopwatch();
+  //     needToResumeRef.current = false;
+  //   }
+  // }
 
-  function pauseStopWatch() {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }
+  // useEffect(() => {
+  //   window.addEventListener("blur", onBlur);
+  //   window.addEventListener("focus", onFocus);
 
-  function resetStopWatch() {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setTime(0);
-    needToResumeRef.current = false;
-  }
+  //   return () => {
+  //     window.removeEventListener("blur", onBlur);
+  //     window.removeEventListener("focus", onFocus);
 
-  function onBlur() {
-    // remember if it was running
-    needToResumeRef.current = intervalRef.current !== null;
-
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }
-
-  function onFocus() {
-    if (needToResumeRef.current) {
-      startStopWatch();
-      needToResumeRef.current = false;
-    }
-  }
-
-  useEffect(() => {
-    window.addEventListener("blur", onBlur);
-    window.addEventListener("focus", onFocus);
-
-    return () => {
-      window.removeEventListener("blur", onBlur);
-      window.removeEventListener("focus", onFocus);
-
-      // cleanup interval on unmount
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  });
+  //     // cleanup interval on unmount
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //     }
+  //   };
+  // });
 
   return (
     <div className="mx-auto max-w-md space-y-5 text-[var(--text-primary)]">
@@ -94,7 +63,7 @@ export default function StopWatch() {
       <div className="flex justify-center gap-3">
         {/* Start */}
         <button
-          onClick={startStopWatch}
+          onClick={startStopwatch}
           className="
             px-4 py-2 text-xs font-medium rounded-md
             bg-[var(--green-primary)] text-white
@@ -108,7 +77,7 @@ export default function StopWatch() {
 
         {/* Pause */}
         <button
-          onClick={pauseStopWatch}
+          onClick={pause}
           className="
             px-4 py-2 text-xs font-medium rounded-md
             bg-gray-100 text-[var(--text-primary)]
@@ -122,7 +91,7 @@ export default function StopWatch() {
 
         {/* Reset */}
         <button
-          onClick={resetStopWatch}
+          onClick={reset}
           className="
             px-4 py-2 text-xs font-medium rounded-md
             bg-gray-100 text-[var(--text-primary)]

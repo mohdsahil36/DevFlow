@@ -172,3 +172,124 @@
 button {
   -webkit-tap-highlight-color: transparent;
 }
+
+/*styles for the dashboard and general pages*/
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap");
+
+:root {
+  /* Backgrounds */
+  --db-bg-main: #f0f2f0;
+  --db-bg-surface: #ffffff;
+  --db-bg-surface-2: #f7f9f7;
+  --db-bg-surface-3: #eef2ee;
+
+  /* Borders */
+  --db-border-default: rgba(19, 138, 63, 0.12);
+  --db-border-mid: rgba(19, 138, 63, 0.22);
+  --db-border-strong: rgba(19, 138, 63, 0.38);
+
+  /* Text */
+  --db-text-primary: #0f1f12;
+  --db-text-secondary: #4a5e4e;
+  --db-text-tertiary: #8a9e8d;
+
+  /* Green ramp */
+  --db-green-soft: #e4f2e8;
+  --db-green-mid: #c2e0ca;
+  --db-green-primary: #138a3f;
+  --db-green-hover: #0f7234;
+  --db-green-active: #0a5a28;
+
+  /* Accents */
+  --db-amber: #c4820a;
+  --db-amber-soft: #fef3dc;
+  --db-red: #c0392b;
+  --db-red-soft: #fdecea;
+  --db-blue: #1a6fa8;
+  --db-blue-soft: #e3f0f9;
+
+  --db-font-ui: "Sora", system-ui, sans-serif;
+  --db-font-mono: "IBM Plex Mono", "Fira Mono", monospace;
+}
+
+@layer utilities {
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-areas:
+      "hdr  hdr  hdr  hdr  hdr  hdr  hdr  hdr  hdr  hdr  hdr  hdr"
+      "chrt chrt chrt chrt chrt chrt chrt foc  foc  foc  foc  foc"
+      "tsk  tsk  tsk  tsk  cal  cal  cal  cal  ins  ins  ins  ins"
+      "nts  nts  nts  nts  nts  nts  upc  upc  upc  upc  upc  upc";
+    gap: 10px;
+  }
+
+  @media (max-width: 1024px) {
+    .bento-grid {
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-areas:
+        "hdr  hdr  hdr  hdr  hdr  hdr"
+        "chrt chrt chrt chrt chrt chrt"
+        "foc  foc  foc  tsk  tsk  tsk"
+        "cal  cal  cal  ins  ins  ins"
+        "nts  nts  nts  upc  upc  upc";
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "hdr"
+        "ins"
+        "chrt"
+        "foc"
+        "tsk"
+        "cal"
+        "upc"
+        "nts";
+      gap: 8px;
+    }
+  }
+
+  /* Grid area assignments */
+  .area-hdr {
+    grid-area: hdr;
+  }
+  .area-chrt {
+    grid-area: chrt;
+  }
+  .area-foc {
+    grid-area: foc;
+  }
+  .area-tsk {
+    grid-area: tsk;
+  }
+  .area-cal {
+    grid-area: cal;
+  }
+  .area-ins {
+    grid-area: ins;
+  }
+  .area-nts {
+    grid-area: nts;
+  }
+  .area-upc {
+    grid-area: upc;
+  }
+
+  .focus-ring {
+    background: conic-gradient(
+      var(--db-green-primary) var(--focus-pct, 72%),
+      var(--db-bg-surface-3) 0
+    );
+  }
+
+  .font-mono-db {
+    font-family: var(--db-font-mono);
+  }
+  .font-ui-db {
+    font-family: var(--db-font-ui);
+  }
+}
