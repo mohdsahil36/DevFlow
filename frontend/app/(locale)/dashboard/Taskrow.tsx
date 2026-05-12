@@ -1,32 +1,31 @@
 import type { FC } from "react";
-
-type TaskPriority = "high" | "med" | "low";
-type TaskStatus = "Done" | "In Progress" | "To Do";
-
+import { TaskPriority, TaskStatus } from "./dashboardData";
 interface TaskRowProps {
-  text: string;
+  title: string;
   status: TaskStatus;
   priority: TaskPriority;
 }
 
 const PRIORITY_CLASSES: Record<TaskPriority, string> = {
-  high: "bg-[var(--db-red-soft)]   text-[var(--db-red)]",
-  med: "bg-[var(--db-amber-soft)] text-[var(--db-amber)]",
-  low: "bg-[var(--db-green-soft)] text-[var(--db-green-active)]",
+  High: "bg-[var(--db-red-soft)]   text-[var(--db-red)]",
+  Medium: "bg-[var(--db-amber-soft)] text-[var(--db-amber)]",
+  Low: "bg-[var(--db-green-soft)] text-[var(--db-green-active)]",
 };
 
 const PRIORITY_LABELS: Record<TaskPriority, string> = {
-  high: "High",
-  med: "Med",
-  low: "Low",
+  High: "High",
+  Medium: "Medium",
+  Low: "Low",
 };
 
-const TaskRow: FC<TaskRowProps> = ({ text, status, priority }) => {
+const TaskRow: FC<TaskRowProps> = ({ title, status, priority }) => {
   const isDone = status === "Done";
   const isInProgress = status === "In Progress";
 
   return (
-    <div className="flex items-center gap-2.5 py-2.5 border-b border-[var(--db-border-default)] last:border-b-0 last:pb-0">
+    <div
+      className="flex items-center gap-2.5 py-2.5 border-b border-[var(--db-border-default)] last:border-b-0 last:pb-0"
+    >
       <span
         aria-hidden="true"
         className={[
@@ -64,7 +63,7 @@ const TaskRow: FC<TaskRowProps> = ({ text, status, priority }) => {
             : "text-[var(--db-text-primary)]",
         ].join(" ")}
       >
-        {text}
+        {title}
       </span>
 
       <span

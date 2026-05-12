@@ -1,4 +1,4 @@
-export type TaskPriority = "high" | "med" | "low";
+export type TaskPriority = "High" | "Medium" | "Low";
 export type TaskStatus = "Done" | "In Progress" | "To Do";
 
 export interface SampleTask {
@@ -17,24 +17,8 @@ export interface UpcomingEvent {
   time: string;
   title: string;
   tag: "eng" | "design" | "mgmt";
-  color: string; // CSS var string — used only in recharts / SVG dot, unavoidable
+  color: string;
 }
-
-/* ── SAMPLE DATA — replace with live API/store data ── */
-
-export const SAMPLE_TASKS: SampleTask[] = [
-  { id: 1, text: "Design system tokens", status: "Done", priority: "high" },
-  { id: 2, text: "API integration spec", status: "Done", priority: "high" },
-  { id: 3, text: "Auth flow refactor", status: "In Progress", priority: "med" },
-  {
-    id: 4,
-    text: "Dashboard bento layout",
-    status: "In Progress",
-    priority: "med",
-  },
-  { id: 5, text: "Write unit tests", status: "To Do", priority: "low" },
-  { id: 6, text: "E2E test coverage", status: "To Do", priority: "low" },
-];
 
 export const VELOCITY_DATA: VelocityPoint[] = [
   { day: "Mon", tasks: 2 },
