@@ -24,10 +24,6 @@ const orderOfTime = [
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ≈ 282.74
 
-function pad(n: number) {
-  return n.toString().padStart(2, "0");
-}
-
 export default function Pomodoro() {
   const [config, setConfig] = useState(structuredClone(timeConfig));
 
