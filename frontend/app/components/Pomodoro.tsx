@@ -21,21 +21,8 @@ const orderOfTime = [
   timeFactors.Seconds,
 ];
 
-/* ── RING GEOMETRY — matches FocusCell exactly ───────────── */
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ≈ 282.74
-
-/* ── HELPERS ─────────────────────────────────────────────── */
-function pad(n: number) {
-  return n.toString().padStart(2, "0");
-}
-
-function formatTime(ms: number) {
-  const s = Math.floor((ms / 1000) % 60);
-  const m = Math.floor((ms / (1000 * 60)) % 60);
-  const hr = Math.floor((ms / (1000 * 60 * 60)) % 24);
-  return `${pad(hr)}:${pad(m)}:${pad(s)}`;
-}
 
 export default function Pomodoro() {
   const [config, setConfig] = useState(structuredClone(timeConfig));

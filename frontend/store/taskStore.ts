@@ -25,6 +25,7 @@ type KanbanStore = {
 export const useTaskStore = create<KanbanStore>((set) => ({
   tasks: [],
   fetchTasks: async (route?: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
     let shouldFetch = false;
     let fetchRoute = "";
 
@@ -35,16 +36,16 @@ export const useTaskStore = create<KanbanStore>((set) => ({
 
     if (shouldFetch) {
       try {
-        const response = await fetch(`http://localhost:8080${fetchRoute}`);
-
+        const response = await fetch(`${baseUrl}${fetchRoute}`);
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const body = await response.text();
+          throw new Error(`HTTP error! status: ${response.status} body: ${body}`);
         }
 
         const jsonResponse = await response.json();
         if (!jsonResponse.success) {
-          throw new Error("API returned unsuccessful response");
+          throw new Error(`API returned unsuccessful response: ${JSON.stringify(jsonResponse)}`);
         }
 
         if (jsonResponse.data && Array.isArray(jsonResponse.data)) {
@@ -52,7 +53,7 @@ export const useTaskStore = create<KanbanStore>((set) => ({
         }
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
-        throw new Error("Data was not fetched!");
+        throw new Error(`Data was not fetched! ${err instanceof Error ? err.message : String(err)}`);
       }
     }
   },
