@@ -17,7 +17,7 @@ type KanbanStore = {
   updateTaskStatus: (taskId: string, newStatus: string) => Promise<Response>;
   addOrEditTask: (
     taskData: TaskFormData,
-    isEditMode: boolean
+    isEditMode: boolean,
   ) => Promise<SaveTaskResponse>;
   deleteTasks: (taskId: string) => Promise<Response>;
 };
@@ -40,12 +40,16 @@ export const useTaskStore = create<KanbanStore>((set) => ({
 
         if (!response.ok) {
           const body = await response.text();
-          throw new Error(`HTTP error! status: ${response.status} body: ${body}`);
+          throw new Error(
+            `HTTP error! status: ${response.status} body: ${body}`,
+          );
         }
 
         const jsonResponse = await response.json();
         if (!jsonResponse.success) {
-          throw new Error(`API returned unsuccessful response: ${JSON.stringify(jsonResponse)}`);
+          throw new Error(
+            `API returned unsuccessful response: ${JSON.stringify(jsonResponse)}`,
+          );
         }
 
         if (jsonResponse.data && Array.isArray(jsonResponse.data)) {
@@ -53,7 +57,9 @@ export const useTaskStore = create<KanbanStore>((set) => ({
         }
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
-        throw new Error(`Data was not fetched! ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(
+          `Data was not fetched! ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
   },
@@ -84,10 +90,14 @@ export const useTaskStore = create<KanbanStore>((set) => ({
       const json = await response.json();
 
       if (!response.ok || !json?.success) {
-        throw new Error(json?.error || `Request failed with ${response.status}`);
+        throw new Error(
+          json?.error || `Request failed with ${response.status}`,
+        );
       }
 
-      const createdOrUpdated = isEditMode ? json.data : (json.data || json.receivedData);
+      const createdOrUpdated = isEditMode
+        ? json.data
+        : json.data || json.receivedData;
 
       if (!createdOrUpdated) {
         throw new Error("Invalid response payload: missing task data");
@@ -97,7 +107,11 @@ export const useTaskStore = create<KanbanStore>((set) => ({
       set((state) => {
         if (isEditMode) {
           return {
-            tasks: state.tasks.map((t) => (String(t._id) === String(createdOrUpdated._id) ? createdOrUpdated : t)),
+            tasks: state.tasks.map((t) =>
+              String(t._id) === String(createdOrUpdated._id)
+                ? createdOrUpdated
+                : t,
+            ),
           };
         }
         return { tasks: [...state.tasks, createdOrUpdated] };
@@ -109,7 +123,6 @@ export const useTaskStore = create<KanbanStore>((set) => ({
       throw err;
     }
   },
-  
 
   updateTaskStatus: async (taskId: string, newStatus: string) => {
     try {
@@ -120,8 +133,16 @@ export const useTaskStore = create<KanbanStore>((set) => ({
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
+      if (response.ok) {
+        // pass the id of the task , when the update function is called it will take the tasks and start the filtering , once we have found our task use the spread operator to fetch its values and update the status with the new status we are setting throught the dashboard
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            t._id === taskId ? { ...t, status: newStatus } : t,
+          ),
+        }));
+      }
 
       return response;
     } catch (err) {
@@ -140,7 +161,7 @@ export const useTaskStore = create<KanbanStore>((set) => ({
       if (response.ok) {
         set((state) => ({
           tasks: state.tasks.filter(
-            (task) => String(task._id) !== String(taskId)
+            (task) => String(task._id) !== String(taskId),
           ),
         }));
       }

@@ -25,6 +25,7 @@ import {
   UPCOMING_EVENTS,
   CALENDAR_EVENT_DAYS,
 } from "./dashboardData";
+import { Button } from "@/components/ui/button";
 
 const RECHARTS_TOOLTIP_STYLE: React.CSSProperties = {
   background: "var(--db-bg-surface)",
@@ -67,6 +68,7 @@ const MONO_XS = "font-mono-db text-[11px]";
 export default function DashboardPage() {
   const rawTasks = useTaskStore((s) => s.tasks);
   const fetchTasks = useTaskStore((s) => s.fetchTasks);
+  const updateTaskStatus = useTaskStore((s) => s.updateTaskStatus);
 
   useEffect(() => {
     void fetchTasks("kanban");
@@ -223,25 +225,48 @@ export default function DashboardPage() {
           <FocusCell todoCount={todoTasks} />
         </section>
 
-        <section className={`${CELL} area-tsk`} aria-label="Task list">
+        <section
+          className={`${CELL} area-tsk flex flex-col justify-between`}
+          aria-label="Task list"
+        >
           <div className={CELL_HDR}>
             <div>
               <h2 className={CELL_TITLE}>Tasks</h2>
-              <p className={CELL_SUB}>Active queue</p>
+              <p className={CELL_SUB}>
+                Single click to move to in progress, double click for done
+              </p>
             </div>
+
             <span className={`${MONO_XS} text-[var(--db-text-tertiary)]`}>
               {totalTasks} total
             </span>
           </div>
-          <div role="list">
+
+          <div role="list" className="flex-1 space-y-2">
             {activeTasks.map((t) => (
               <TaskRow
                 key={t._id}
                 title={t.title}
                 status={t.status as TaskStatus}
                 priority={t.priority as TaskPriority}
+                onToggleTask={() => {
+                  const nextStatus =
+                    t.status === "To Do"
+                      ? "In Progress"
+                      : t.status === "In Progress"
+                        ? "Done"
+                        : "To Do";
+
+                  updateTaskStatus(t._id, nextStatus);
+                }}
               />
             ))}
+          </div>
+
+          <div className="pt-4">
+            <Button className="block w-full text-center bg-[var(--db-green-primary)] hover:bg-[var(--db-green-hover)] active:scale-[0.98] text-white rounded-xl py-2.5 text-xs font-semibold tracking-[0.01em] transition-all duration-150">
+              Add New Task
+            </Button>
           </div>
         </section>
 

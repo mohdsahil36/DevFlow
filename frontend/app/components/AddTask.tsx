@@ -1,3 +1,5 @@
+"use client";
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,14 +36,30 @@ const initialFormData = {
   dueDate: undefined,
 };
 
+/* ── SHARED INPUT CLASS ─────────────────────────────────── */
+const INPUT_CLASS = `
+  mt-2 w-full
+  bg-[var(--db-bg-surface-2)]
+  border border-[var(--db-border-default)]
+  rounded-xl px-3 py-2
+  text-xs text-[var(--db-text-primary)]
+  placeholder:text-[var(--db-text-tertiary)]
+  focus:outline-none focus:border-[var(--db-green-primary)] focus:ring-1 focus:ring-[var(--db-green-primary)]
+  transition-colors duration-150
+`;
+
+const LABEL_CLASS =
+  "text-[10px] font-medium tracking-[0.07em] uppercase text-[var(--db-text-tertiary)]";
+
 export default function AddTask(props: AddTaskProps) {
   const [formData, setFormData] = useState<TaskFormData>(
     initialFormData as TaskFormData,
   );
-  const editTaskData = props.selectedData;
 
-  // Destructure from the hook
+  const editTaskData = props.selectedData;
+  const isEditMode = !!(editTaskData && editTaskData.data);
   const { addOrEditTask } = useTaskStore();
+
   useEffect(() => {
     if (editTaskData) {
       const taskData = editTaskData.data;
@@ -58,11 +76,10 @@ export default function AddTask(props: AddTaskProps) {
     } else {
       setFormData(initialFormData as TaskFormData);
     }
-  }, [editTaskData, props.status]); // undefined
+  }, [editTaskData, props.status]);
+
   async function submitForm(e: React.FormEvent) {
     e.preventDefault();
-
-    const isEditMode = !!(editTaskData && editTaskData.data);
 
     const taskToSubmit = {
       ...formData,
@@ -79,11 +96,6 @@ export default function AddTask(props: AddTaskProps) {
         );
         return;
       }
-      console.log(
-        `Task ${isEditMode ? "updated" : "added"} successfully:`,
-        result,
-      );
-
       setFormData(initialFormData as TaskFormData);
       props.setOpenModal(false);
     } catch (error) {
@@ -93,157 +105,236 @@ export default function AddTask(props: AddTaskProps) {
 
   const handleDialogClose = (open: boolean) => {
     props.setOpenModal(open);
-    if (!open) {
-      setFormData(initialFormData as TaskFormData);
-    }
+    if (!open) setFormData(initialFormData as TaskFormData);
   };
 
   return (
-    <div className="font-mono">
-      <Dialog onOpenChange={handleDialogClose} open={props.openModal}>
-        <DialogContent
-          className="min-w-[42rem] 
-          border-2 border-black 
-          bg-[#f8f6f2] 
-          shadow-[3px_3px_0px_#1f1f1f] 
-          p-0"
-        >
-          <DialogTitle className="sr-only">
-            {props.selectedData ? "Edit Task" : "Add Task"}
-          </DialogTitle>
-          {/* Header */}
-          <div className="bg-[#1f1f1f] text-white px-3 py-2 text-xs">
-            TASK EDITOR
+    <Dialog onOpenChange={handleDialogClose} open={props.openModal}>
+      <DialogContent
+        className="
+          min-w-[42rem] p-0
+          bg-[var(--db-bg-surface)]
+          border border-[var(--db-border-default)]
+          rounded-2xl
+          shadow-[0_8px_32px_rgba(19,138,63,0.08)]
+          font-ui-db
+          overflow-hidden
+        "
+      >
+        <DialogTitle className="sr-only">
+          {isEditMode ? "Edit Task" : "Add Task"}
+        </DialogTitle>
+
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--db-border-default)] bg-[var(--db-bg-surface-2)]">
+          <div>
+            <h2 className="text-[1rem] font-semibold tracking-[-0.01em] text-[var(--db-text-primary)]">
+              {isEditMode ? "Edit Task" : "New Task"}
+            </h2>
+            <p className="text-[11px] text-[var(--db-text-tertiary)] mt-0.5">
+              {isEditMode
+                ? "Update the task details below"
+                : "Fill in the details to create a task"}
+            </p>
           </div>
 
-          <div className="p-6">
-            <form onSubmit={submitForm}>
-              <div className="flex flex-col gap-y-8">
-                {/* Title */}
-                <div>
-                  <Label className="text-xs">Title</Label>
-                  <Input
-                    placeholder="Enter task title"
-                    className="mt-2 border border-black bg-white text-sm 
-                               rounded-none focus-visible:ring-0"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
+          {/* Status pill */}
+          <span className="text-[9px] font-medium tracking-[0.07em] uppercase px-2.5 py-1 rounded-sm bg-[var(--db-green-soft)] text-[var(--db-green-active)] border border-[var(--db-green-mid)] me-4">
+            {props.status}
+          </span>
+        </div>
+
+        <div className="p-6">
+          <form onSubmit={submitForm}>
+            <div className="flex flex-col gap-5">
+              {/* Title */}
+              <div>
+                <Label className={LABEL_CLASS}>Title</Label>
+                <Input
+                  placeholder="Enter task title"
+                  className={INPUT_CLASS}
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label className={LABEL_CLASS}>Description</Label>
+                <Textarea
+                  placeholder="Enter task details"
+                  className={`${INPUT_CLASS} h-20 resize-none`}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* Priority + Due Date */}
+              <div className="flex gap-4">
+                {/* Priority */}
+                <div className="flex flex-col flex-1">
+                  <Label className={LABEL_CLASS}>Priority</Label>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(value: "low" | "medium" | "high") =>
+                      setFormData({ ...formData, priority: value })
                     }
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Label className="text-xs">Description</Label>
-                  <Textarea
-                    placeholder="Enter task details"
-                    className="mt-2 border border-black bg-white text-sm h-20 
-                               rounded-none focus-visible:ring-0"
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                  />
-                </div>
-
-                {/* Priority + Date */}
-                <div className="flex justify-between gap-6">
-                  {/* Priority */}
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-xs">Priority</Label>
-
-                    <Select
-                      value={formData.priority}
-                      onValueChange={(value: "low" | "medium" | "high") =>
-                        setFormData({ ...formData, priority: value })
-                      }
+                  >
+                    <SelectTrigger
+                      className="
+                        mt-2 w-full
+                        bg-[var(--db-bg-surface-2)]
+                        border border-[var(--db-border-default)]
+                        rounded-xl px-3 py-2 h-auto
+                        text-xs text-[var(--db-text-primary)]
+                        focus:outline-none focus:border-[var(--db-green-primary)] focus:ring-1 focus:ring-[var(--db-green-primary)]
+                        transition-colors duration-150
+                      "
                     >
-                      <SelectTrigger className="w-48 border border-black bg-white text-sm rounded-none">
-                        <SelectValue />
-                      </SelectTrigger>
-
-                      <SelectContent className="border border-black bg-white">
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Date */}
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-xs">Due Date</Label>
-
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          className="w-48 border border-black bg-white px-3 py-2 text-left text-sm
-                                     shadow-[2px_2px_0px_#1f1f1f]
-                                     active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      className="
+                        bg-[var(--db-bg-surface)]
+                        border border-[var(--db-border-default)]
+                        rounded-xl shadow-[0_4px_16px_rgba(19,138,63,0.08)]
+                        text-xs
+                      "
+                    >
+                      {[
+                        {
+                          value: "low",
+                          label: "Low",
+                          cls: "text-[var(--db-green-active)]",
+                        },
+                        {
+                          value: "medium",
+                          label: "Medium",
+                          cls: "text-[var(--db-amber)]",
+                        },
+                        {
+                          value: "high",
+                          label: "High",
+                          cls: "text-[var(--db-red)]",
+                        },
+                      ].map(({ value, label, cls }) => (
+                        <SelectItem
+                          key={value}
+                          value={value}
+                          className={`text-xs cursor-pointer ${cls}`}
                         >
-                          {formData.dueDate
-                            ? formData.dueDate.toDateString()
-                            : "Select Date"}
-                        </button>
-                      </PopoverTrigger>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                      <PopoverContent className="border border-black p-0">
-                        <Calendar
-                          mode="single"
-                          selected={formData.dueDate}
-                          onSelect={(date) => {
-                            if (date) {
-                              setFormData({ ...formData, dueDate: date });
-                            }
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                {/* Due Date */}
+                <div className="flex flex-col flex-1">
+                  <Label className={LABEL_CLASS}>Due Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="
+                          mt-2 w-full
+                          bg-[var(--db-bg-surface-2)]
+                          border border-[var(--db-border-default)]
+                          hover:border-[var(--db-border-mid)]
+                          rounded-xl px-3 py-2
+                          text-left text-xs
+                          text-[var(--db-text-primary)]
+                          transition-colors duration-150
+                          active:scale-[0.98]
+                        "
+                      >
+                        {formData.dueDate ? (
+                          formData.dueDate.toDateString()
+                        ) : (
+                          <span className="text-[var(--db-text-tertiary)]">
+                            Select date
+                          </span>
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="
+                        p-0
+                        bg-[var(--db-bg-surface)]
+                        border border-[var(--db-border-default)]
+                        rounded-2xl
+                        shadow-[0_4px_16px_rgba(19,138,63,0.08)]
+                      "
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={formData.dueDate}
+                        onSelect={(date) => {
+                          if (date) setFormData({ ...formData, dueDate: date });
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
+            </div>
 
-              {/* Actions */}
-              <div className="flex justify-end gap-4 mt-8">
-                {/* Primary */}
-                <button
-                  type="submit"
-                  className="px-4 py-2 border-2 border-black 
-                             bg-[#dbeafe] 
-                             shadow-[3px_3px_0px_#1f1f1f]
-                             text-xs
-                             active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-                >
-                  {props.selectedData ? "Update Task" : "Add Task"}
-                </button>
+            <div className="flex justify-end gap-2 mt-6 pt-5 border-t border-[var(--db-border-default)]">
+              {/* Cancel */}
+              <button
+                type="button"
+                onClick={() => props.setOpenModal(false)}
+                className="
+                  px-4 py-2 text-xs font-medium rounded-xl
+                  bg-[var(--db-bg-surface-2)]
+                  border border-[var(--db-border-default)]
+                  text-[var(--db-text-secondary)]
+                  hover:border-[var(--db-border-mid)]
+                  active:scale-[0.98]
+                  transition-all duration-150
+                "
+              >
+                Cancel
+              </button>
 
-                {/* Secondary */}
-                <button
-                  type="button"
-                  onClick={() => setFormData(initialFormData as TaskFormData)}
-                  className="px-4 py-2 border-2 border-black 
-                             bg-[#fef08a]
-                             shadow-[2px_2px_0px_#1f1f1f]
-                             text-xs
-                             active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-                >
-                  Reset
-                </button>
+              {/* Reset */}
+              <button
+                type="button"
+                onClick={() => setFormData(initialFormData as TaskFormData)}
+                className="
+                  px-4 py-2 text-xs font-medium rounded-xl
+                  bg-[var(--db-bg-surface-2)]
+                  border border-[var(--db-border-default)]
+                  text-[var(--db-text-secondary)]
+                  hover:border-[var(--db-border-mid)]
+                  active:scale-[0.98]
+                  transition-all duration-150
+                "
+              >
+                Reset
+              </button>
 
-                {/* Tertiary */}
-                <button
-                  type="button"
-                  onClick={() => props.setOpenModal(false)}
-                  className="px-4 py-2 border border-black bg-white text-xs"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+              {/* Submit */}
+              <button
+                type="submit"
+                className="
+                  px-5 py-2 text-xs font-semibold rounded-xl
+                  bg-[var(--db-green-primary)] text-white
+                  hover:bg-[var(--db-green-hover)]
+                  active:scale-[0.98]
+                  transition-all duration-150
+                "
+              >
+                {isEditMode ? "Update Task" : "Add Task"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
