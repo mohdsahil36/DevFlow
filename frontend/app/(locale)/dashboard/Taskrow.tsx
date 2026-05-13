@@ -4,10 +4,11 @@ interface TaskRowProps {
   title: string;
   status: TaskStatus;
   priority: TaskPriority;
+  onToggleTask?: () => void;
 }
 
 const PRIORITY_CLASSES: Record<TaskPriority, string> = {
-  High: "bg-[var(--db-red-soft)]   text-[var(--db-red)]",
+  High: "bg-[var(--db-re  d-soft)]   text-[var(--db-red)]",
   Medium: "bg-[var(--db-amber-soft)] text-[var(--db-amber)]",
   Low: "bg-[var(--db-green-soft)] text-[var(--db-green-active)]",
 };
@@ -18,24 +19,29 @@ const PRIORITY_LABELS: Record<TaskPriority, string> = {
   Low: "Low",
 };
 
-const TaskRow: FC<TaskRowProps> = ({ title, status, priority }) => {
+const TaskRow: FC<TaskRowProps> = ({
+  title,
+  status,
+  priority,
+  onToggleTask,
+}) => {
   const isDone = status === "Done";
   const isInProgress = status === "In Progress";
 
   return (
-    <div
-      className="flex items-center gap-2.5 py-2.5 border-b border-[var(--db-border-default)] last:border-b-0 last:pb-0"
-    >
+    <div className="flex items-center gap-2.5 py-2.5 border-b border-[var(--db-border-default)] last:border-b-0 last:pb-0">
       <span
-        aria-hidden="true"
+        aria-label={isDone ? "Mark as to do" : "Mark as done"}
+        onClick={onToggleTask}
         className={[
-          "relative flex-shrink-0 w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center transition-colors duration-150",
+          `relative flex-shrink-0 w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center transition-colors duration-150`,
           isDone
             ? "bg-[var(--db-green-primary)] border-[var(--db-green-primary)]"
             : isInProgress
               ? "border-[var(--db-amber)]"
               : "border-[var(--db-border-mid)]",
         ].join(" ")}
+        role="button"
       >
         {isDone && (
           <svg
@@ -60,7 +66,9 @@ const TaskRow: FC<TaskRowProps> = ({ title, status, priority }) => {
           "flex-1 text-xs truncate",
           isDone
             ? "line-through text-[var(--db-text-tertiary)] decoration-[var(--db-text-tertiary)]"
-            : "text-[var(--db-text-primary)]",
+            : isInProgress
+              ? "text-[var(--db-amber)]"
+              : "text-[var(--db-text-primary)]",
         ].join(" ")}
       >
         {title}
@@ -69,7 +77,7 @@ const TaskRow: FC<TaskRowProps> = ({ title, status, priority }) => {
       <span
         className={`flex-shrink-0 text-[9px] font-medium tracking-[0.06em] uppercase px-1.5 py-0.5 rounded ${PRIORITY_CLASSES[priority]}`}
       >
-        {PRIORITY_LABELS[priority]}
+        {PRIORITY_LABELS[priority] ?? priority}
       </span>
     </div>
   );
