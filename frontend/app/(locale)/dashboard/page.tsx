@@ -39,7 +39,7 @@ const RECHARTS_TOOLTIP_STYLE: React.CSSProperties = {
 const RECHARTS_LABEL_STYLE: React.CSSProperties = {
   color: "var(--db-text-tertiary)",
 };
-const RECHARTS_CURSOR_STYLE: React.CSSProperties = {
+const RECHARTS_CURSOR_STYLE: React.SVGProps<SVGElement> = {
   stroke: "var(--db-border-mid)",
   strokeWidth: 1,
 };
