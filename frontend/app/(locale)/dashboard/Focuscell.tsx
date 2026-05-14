@@ -71,12 +71,11 @@ export default function FocusCell({ todoCount }: FocusCellProps) {
           </button>
         ))}
       </div>
-
       <Link
         href="/pomodoro"
         className="mt-auto block w-full text-center bg-[var(--db-green-primary)] hover:bg-[var(--db-green-hover)] active:scale-[0.98] text-white rounded-xl py-2.5 text-xs font-semibold tracking-[0.01em] transition-colors duration-150"
       >
-        Start Session →
+        Move to the pomodoro page
       </Link>
     </div>
   );
