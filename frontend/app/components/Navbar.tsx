@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ModeToggle } from "../styles/modeToggle";
 
 const pageLinks = ["dashboard", "kanban", "pomodoro", "notes"];
 
@@ -17,24 +18,27 @@ export default function Navbar() {
         </h1>
 
         {/* Links */}
-        <ul className="flex items-center gap-2">
-          {pageLinks.map((item) => (
-            <li key={item}>
-              <Link
-                href={`/${item}`}
-                className="
+        <div className="flex ">
+          <ul className="flex items-center gap-2">
+            {pageLinks.map((item) => (
+              <li key={item}>
+                <Link
+                  href={`/${item}`}
+                  className="
                   px-3 py-1.5 text-xs font-medium rounded-md
                   text-[var(--text-secondary)]
                   hover:text-[var(--text-primary)]
                   hover:bg-gray-100
                   transition
                 "
-              >
-                {item}
-              </Link>
-            </li>
-          ))}
-        </ul>
+                >
+                  {item}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ModeToggle />
+        </div>
       </div>
     </nav>
   );

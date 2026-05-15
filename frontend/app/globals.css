@@ -80,7 +80,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+html.dark, body.dark, .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -112,6 +112,38 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.145 0 0);
+  /* ... all existing tokens ... */
+  --sidebar-ring: oklch(0.556 0 0);
+
+  /* ── dashboard dark tokens ── */
+  --db-bg-main: #0d1410;
+  --db-bg-surface: #111a14;
+  --db-bg-surface-2: #162019;
+  --db-bg-surface-3: #1c2a1f;
+
+  --db-border-default: rgba(19, 138, 63, 0.15);
+  --db-border-mid: rgba(19, 138, 63, 0.28);
+  --db-border-strong: rgba(19, 138, 63, 0.45);
+
+  --db-text-primary: #e8f0e9;
+  --db-text-secondary: #9ab89e;
+  --db-text-tertiary: #5a7a5e;
+
+  --db-green-soft: rgba(19, 138, 63, 0.15);
+  --db-green-mid: rgba(19, 138, 63, 0.28);
+  --db-green-primary: #1aad50;
+  --db-green-hover: #1fc45c;
+  --db-green-active: #4ade80;
+
+  --db-amber-soft: rgba(196, 130, 10, 0.15);
+  --db-amber: #f0a830;
+
+  --db-red-soft: rgba(192, 57, 43, 0.15);
+  --db-red: #f87171;
+
+  --db-blue-soft: rgba(26, 111, 168, 0.15);
+  --db-blue: #60a5fa;
 }
 
 @layer base {
@@ -120,19 +152,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    background:
-      radial-gradient(
-        1100px circle at 12% -28%,
-        rgba(245, 231, 202, 0.4),
-        transparent 48%
-      ),
-      radial-gradient(
-        860px circle at 100% 0%,
-        rgba(191, 206, 255, 0.16),
-        transparent 44%
-      ),
-      linear-gradient(180deg, #fdfcf8 0%, #f8f5ee 100%);
-    color: #231f1a;
+    background: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -155,6 +176,20 @@
 
   /* Soft */
   --green-soft: #dcfce7;
+}
+
+html.dark .app-theme,
+body.dark .app-theme,
+.dark .app-theme {
+  --bg-main: #0f1812;
+  --bg-surface: #111a14;
+  --border-default: rgba(255, 255, 255, 0.08);
+  --text-primary: #f4fdf7;
+  --text-secondary: #97b59e;
+  --green-primary: #5eead4;
+  --green-hover: #34d399;
+  --green-active: #22c55e;
+  --green-soft: rgba(16, 185, 129, 0.12);
 }
 
 @keyframes spin-slow {
